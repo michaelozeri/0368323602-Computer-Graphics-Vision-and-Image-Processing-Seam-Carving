@@ -1,5 +1,5 @@
 
-using javax.imageio;
+import javax.imageio.ImageIO;
 
 public class HomeAssignment1main {
 	public static void main(String[] args){
