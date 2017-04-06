@@ -18,7 +18,7 @@ public class HomeAssignment1main {
 		program will write the output image to)*/
 		String outputimagepath = args[4];
 		
-		
+		System.out.println("is it working?");
 
 		
 		System.out.println("at main function of HomeAssignment1");
