@@ -1,8 +1,19 @@
-
+import java.io.File;
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+
 
 public class HomeAssignment1main {
 	public static void main(String[] args){
+		
+		if(args.length != 5){
+			System.out.println("ERROR: not enough arguments inserted");
+			System.exit(0); //TODO: check if o.k to exit like this	
+		}
+		
+		int originalnumofrows = 0,originalnumofcolumns=0;
 		
 		//Full path to the input image
 		String inputimagepath = args[0];
@@ -18,11 +29,38 @@ public class HomeAssignment1main {
 		program will write the output image to)*/
 		String outputimagepath = args[4];
 		
-		System.out.println("is it working?");
-
-		
-		System.out.println("at main function of HomeAssignment1");
-		
+		//opening the photo and storing it into bufferedimage
+		try{
+			File inputimagefile = new File(inputimagepath);
+			BufferedImage inputimagebuffer = ImageIO.read(inputimagefile);
+			originalnumofrows =  inputimagebuffer.getWidth();
+			originalnumofcolumns =  inputimagebuffer.getHeight();
+			
+			//compute energy of image
+			int[][] energymatrix  = ImageUtils.Calculate_Energy(inputimagebuffer, energytype);
+			
+			//check how much to resize vertically
+			int resizenumber = originalnumofcolumns - outputnumcolumns;
+			if (resizenumber > 0){ // if we need to reduce vertical seam's
+				for(;resizenumber>0;resizenumber--){
+					inputimagebuffer =  ImageUtils.Remove_seam(inputimagebuffer, energymatrix, 0);
+				}
+			}
+			else if(resizenumber < 0){ // need to add vertical seams's
+				//TODO: part 2, need to implement add function	
+			}
+			
+			//TODO: part 2 - flip, remove / add seam's
+			
+			File outputimagefile = new File(outputimagepath);
+			ImageIO.write(inputimagebuffer, "png", outputimagefile); //TODO: check return value
+			
+		}catch (IOException e){
+			System.out.println("IOException: "+e.getMessage());
+		}
+		catch (Exception e){
+			System.out.println("ERROR: "+e.getMessage());
+		}
 		
 	}
 
