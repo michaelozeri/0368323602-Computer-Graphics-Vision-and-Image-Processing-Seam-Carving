@@ -8,37 +8,7 @@ import java.math.*;
 
 
 public class HomeAssignment1main {
-	public static int[][] transposeMatrix(int [][] image){
-        int[][] transposed = new int[image[0].length][image.length];
-        for (int i = 0; i < image.length; i++)
-            for (int j = 0; j < image[0].length; j++)
-            	transposed[j][i] = image[i][j];
-        return transposed;
-    }
-	public static int[][] calcuateMinSeam(int [][] energy){
-		int[][] minSeam = new int[energy[0].length][energy.length];
-		for (int i = 1; i < energy.length; i++)//go through every row
-            for (int j = 0; j < energy[0].length; j++){//add the value of energy above
-            	if(j==0){
-            		minSeam[i][j] += Math.min(energy[i-1][j],energy[i-1][j-1]);
-            	}
-            	else if(j==energy[0].length-1){
-            		minSeam[i][j] += Math.min(energy[i-1][j],energy[i-1][j-1]);
-            	}
-            	else
-            		minSeam[i][j] += Math.min(energy[i-1][j],Math.min(energy[i-1][j-1],energy[i-1][j+1]));
-            }
-        return minSeam;
-		
-	}
-	public static int[][] calcuateStraightSeam(int [][] energy){
-		int[][] straightsSeam = new int[energy[0].length][energy.length];
-		for (int i = 1; i < energy.length; i++)//go through every row
-            for (int j = 0; j < energy[0].length; j++)//add the value of energy above
-            	straightsSeam[i][j] += energy[i-1][j];
-        return straightsSeam;
-		
-	}
+	
 	public static void main(String[] args){
 		
 		if(args.length != 5){
