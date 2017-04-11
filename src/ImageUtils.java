@@ -54,7 +54,34 @@ public class ImageUtils {
 		
 		return newimage;
 	}
-	
+	public static BufferedImage Remove_straight_seam(String outputfilename, BufferedImage originalimage,int[][] energymat,int[][] rgbmat, int colToReduce){
+		int m = originalimage.getWidth();
+		int n = originalimage.getHeight();
+		int minIntVal = Integer.MAX_VALUE + 1;
+		for(int i = 0; i<colToReduce;i++){
+			int min = energymat[n-1][0];
+			for(int j =1; j<m;j++){
+				int temp = energymat[n-1][j];
+				if(temp > minIntVal && temp<min){
+					for(int r = 0; r<n; r++){
+						energymat[r][j] = minIntVal;
+					}
+				}
+			}
+		}
+		BufferedImage newImage = new BufferedImage(n, m-colToReduce, originalimage.getType());
+		for(int i=0; i<n; i++){
+	         
+            for(int j=0; j<m; j++){
+            	if(energymat[i][j] == minIntVal){
+            		continue;
+            	}
+               newImage.setRGB(j,i,originalimage.getRGB(j,i));
+            }
+         }
+		return newImage;
+	}
+
 	private static void Calculate_Hi(int[][] matrix,int[][] rgbmat,int n,int m){
 		int[][] pmnMat = Calculate_pmn(rgbmat,n, m);
 		for(int i=0;i<m;i++){
