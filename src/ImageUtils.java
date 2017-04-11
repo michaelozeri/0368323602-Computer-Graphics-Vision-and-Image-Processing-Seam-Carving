@@ -8,29 +8,45 @@ public class ImageUtils {
 		
 		int m = image.getWidth();
 		int n = image.getHeight();
-		int currentcolor,tempcolor,energy_ij = 0,val_ij,valcount=0;;
-		
+		int energy_ij = 0,valcount=0;;
+		int[][] rgbmat = rgbMatrix(image);//returns Matrix of rgb colors
 		int[][] energymatrix = new int[m][n];
 		
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
-				currentcolor = image.getRGB(i, j);
-				//TODO: calculate distance from all around pixels using the "Calculate_distance private function
+				for(int k = Math.max(i-1, 0); k<Math.min(i+1, m);k++){
+					for(int l = Math.max(j-1, 0); l<Math.min(j+1, n);l++){
+						if(i != k || l!=j){
+							valcount++;
+							energy_ij += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
+						}
+					}
+				}
 				energy_ij/=valcount;
 				energymatrix[i][j] = energy_ij;
 				energy_ij = 0;
-				val_ij = 0;
 				valcount = 0;
 			}
 		}
 		
 		if(energytype>=1){ //TODO: is this o.k for energy type of 2?
-			Calculate_Hi(energymatrix,image);
+			Calculate_Hi(energymatrix,rgbmat, n, m);
 		}
 		
 		return energymatrix;
 	}
-	
+	//gets an image and evaluates the rgb matrix
+	private static int[][] rgbMatrix(BufferedImage image){
+		int m = image.getWidth();
+		int n = image.getHeight();
+		int[][] rgbmat = new int[m][n];
+		for(int i=0;i<m;i++){
+			for(int j=0;j<n;j++){
+				rgbmat[i][j] = image.getRGB(i, j);
+			}
+		}
+		return rgbmat;
+	}
 	public static BufferedImage Remove_seam(BufferedImage originalimage, int[][] energymat,int seamtype){
 		
 		//create new image
@@ -39,10 +55,41 @@ public class ImageUtils {
 		return newimage;
 	}
 	
-	private static void Calculate_Hi(int[][] matrix,BufferedImage image){
-		//TODO: complete
+	private static void Calculate_Hi(int[][] matrix,int[][] rgbmat,int n,int m){
+		int[][] pmnMat = Calculate_pmn(rgbmat,n, m);
+		for(int i=0;i<m;i++){
+			for(int j=0;j<n;j++){
+				double hi = 0;
+				for(int k = Math.max(i-4, 0); k<Math.min(i+4, m);k++){
+					for(int l = Math.max(j-4, 0); l<Math.min(j+4, n);l++){
+						if(i != k || l!=j){
+							hi += (pmnMat[k][l] * Math.log(pmnMat[k][l]));	
+						}
+					}
+				}
+				matrix[i][j] -= (int)hi;
+			}
+		}	
 	}
-	
+	//gets an rgb matrix and evaluates the pmn for each pixel
+	private static int[][] Calculate_pmn(int[][] rgbmat,int n,int m){
+		int[][] greyscaleMat = grayScale(rgbmat,n, m);
+		int[][] pmnMat = new int[m][n];
+		for(int i=0;i<m;i++){
+			for(int j=0;j<n;j++){
+				int temppmn = 0;
+				for(int k = Math.max(i-4, 0); k<Math.min(i+4, m);k++){
+					for(int l = Math.max(j-4, 0); l<Math.min(j+4, n);l++){
+						if(i != k || l!=j){
+							temppmn += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
+						}
+					}
+				}
+				pmnMat[i][j] = greyscaleMat[i][j]/temppmn;
+			}
+		}
+		return pmnMat;
+	}
 	private static int Calculate_distance(int orig,int second){
 		Color one = new Color(orig);
 		Color two = new Color(second);
@@ -79,5 +126,18 @@ public class ImageUtils {
         return straightsSeam;
 		
 	}
-
+	//gets an rgb image and evaluates the greyscale matrix
+	private static int[][] grayScale(int[][] rgbmat,int n, int m) {
+		int[][] greyscaleMat = new int[n][m];
+		for(int i=0; i<n; i++){
+	    	for(int j=0; j<m; j++){
+	    		Color c = new Color(rgbmat[i][j]);
+	            int red = (int)(c.getRed() * 0.299);
+	            int green = (int)(c.getGreen() * 0.587);
+	            int blue = (int)(c.getBlue() *0.114);
+	            greyscaleMat[n][m] = red+green+blue;
+	        }
+	    }
+		return greyscaleMat; 
+	}
 }
