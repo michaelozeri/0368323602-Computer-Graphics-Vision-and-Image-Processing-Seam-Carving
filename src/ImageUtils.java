@@ -17,15 +17,15 @@ public class ImageUtils {
 		
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
-				for(int k = Math.max(i-1, 0); k<Math.min(i+1, m);k++){
-					for(int l = Math.max(j-1, 0); l<Math.min(j+1, n);l++){
+				for(int k = Math.max(i-1, 0); k<Math.min(i+2, m);k++){
+					for(int l = Math.max(j-1, 0); l<Math.min(j+2, n);l++){
 						if(i != k || l!=j){
 							valcount++;
 							energy_ij += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
 						}
 					}
 				}
-				energy_ij/=valcount; //TODO: Dor to fix this... - there is a devide by 0 happening here at first iteration
+				energy_ij/=valcount; 
 				energymatrix[i][j] = energy_ij;
 				energy_ij = 0;
 				valcount = 0;
@@ -57,12 +57,106 @@ public class ImageUtils {
 	/*
 	 * removes a general seam as described in the Assignment
 	 * */
-	public static BufferedImage Remove_seam(BufferedImage originalimage, int[][] energymat,int seamtype){
+	public static BufferedImage remove_General_seam(BufferedImage originalimage, int[][] energymat,int seamtype){
 		
-		//create new image
-		BufferedImage newimage = new BufferedImage(originalimage.getWidth(), originalimage.getHeight(), originalimage.getType());
+		//calculate pixel attribute
+		int[][] atrib = CalcPixelAttribute(energymat);
 		
-		return newimage;
+		//calculate minimal seam path - vector representing indexes
+		int[] seam = CalculateGeneralSeam(atrib);
+		
+		//create new image with one less column (width-1)
+		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
+		
+		int k=0; //i of new mat
+		int l=0; //j of new mat
+		//copy only wanted pixels
+		for (int i = 0; i < originalimage.getWidth(); i++) {
+			for (int j = 0; j < originalimage.getHeight(); j++) {
+				if(j == seam[i]){
+					continue;
+				}else{
+					newImage.setRGB(k, l, originalimage.getRGB(i, j));
+					l++;
+				}
+			}
+			l=0;
+			k++;
+		}
+		
+		//return new image
+		return newImage;
+	}
+	
+	/*
+	 * calculates the pixel attribute before calculating seam path
+	 * */
+	public static int[][] CalcPixelAttribute(int[][] energymatrix){
+		
+		int m = energymatrix.length; //m=rows
+		int n = energymatrix[0].length;
+		int tmpleft = Integer.MAX_VALUE;
+		int tmpmid = Integer.MAX_VALUE;
+		int tmpright = Integer.MAX_VALUE;;
+		int[][] atrib = new int[energymatrix.length][energymatrix[0].length];
+		for(int i=1;i<m;i++){
+			for (int j = 0; j < n; j++) {
+				//calculate energy values
+				if(j!=0){tmpleft = energymatrix[i-1][j-1];}
+				if(j!=n-1){tmpright = energymatrix[i-1][j+1];}
+				tmpmid = energymatrix[i-1][j];
+				//store attribute in matrix
+				atrib[i][j] = energymatrix[i][j]+ (int)Math.min((int)Math.min(tmpleft, tmpright),tmpmid);
+				//reset values of tmp
+				tmpleft = Integer.MAX_VALUE;
+				tmpmid = Integer.MAX_VALUE;
+				tmpright = Integer.MAX_VALUE;
+			}
+		}
+		return atrib;
+	}
+	
+	/*
+	 * this function calculates the minimal seam to remove and returns it as a vector
+	 * */
+	public static int[] CalculateGeneralSeam(int[][] atrib){
+		
+		int rows = atrib.length; //m=rows
+		int cols = atrib[0].length;
+		int min = Integer.MAX_VALUE;
+		int minIndex=0;
+		int[] seam = new int[rows];
+		//find first min val
+		for (int j = 0; j < cols; j++) {
+			if(atrib[rows-1][j]<min){
+				min = atrib[rows-1][j];
+				minIndex = j;
+			}
+		}
+		seam[0] = minIndex;
+		int tmpleft = Integer.MAX_VALUE;
+		int tmpmid = Integer.MAX_VALUE;
+		int tmpright = Integer.MAX_VALUE;
+		for (int i = 1; i < seam.length; i++){
+			if(seam[i-1]!=0){
+				tmpleft = atrib[rows-1-i][seam[i-1]-1];
+			}
+			if(seam[i-1]!=cols-1){
+				tmpright = atrib[rows-1-i][seam[i-1]+1];
+			}
+			tmpmid = atrib[rows-1-i][seam[i-1]];
+			min = Math.min(tmpleft, Math.min(tmpright, tmpmid));
+			if(min == tmpleft){
+				seam[i] = seam[i-1]-1;
+			}
+			else if(min == tmpmid){
+				seam[i] = seam[i-1];
+			}else{
+				seam[i] = seam[i-1]+1;
+			}
+		}
+		
+		return seam;
 	}
 	
 	/*
@@ -90,7 +184,7 @@ public class ImageUtils {
             	if(energymat[i][j] == minIntVal){
             		continue;
             	}
-               newImage.setRGB(j,i,originalimage.getRGB(j,i));
+               newImage.setRGB(i,j,originalimage.getRGB(i,j));
             }
          }
 		return newImage;
@@ -105,8 +199,8 @@ public class ImageUtils {
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
 				double hi = 0;
-				for(int k = Math.max(i-4, 0); k<Math.min(i+4, m);k++){
-					for(int l = Math.max(j-4, 0); l<Math.min(j+4, n);l++){
+				for(int k = Math.max(i-4, 0); k<Math.min(i+5, m);k++){
+					for(int l = Math.max(j-4, 0); l<Math.min(j+5, n);l++){
 						if(i != k || l!=j){
 							hi += (pmnMat[k][l] * Math.log(pmnMat[k][l]));	
 						}
@@ -126,8 +220,8 @@ public class ImageUtils {
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
 				int temppmn = 0;
-				for(int k = Math.max(i-4, 0); k<Math.min(i+4, m);k++){
-					for(int l = Math.max(j-4, 0); l<Math.min(j+4, n);l++){
+				for(int k = Math.max(i-4, 0); k<Math.min(i+5, m);k++){
+					for(int l = Math.max(j-4, 0); l<Math.min(j+5, n);l++){
 						if(i != k || l!=j){
 							temppmn += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
 						}
@@ -151,13 +245,13 @@ public class ImageUtils {
 	}
 	
 	/*
-	 * 
+	 * transposes the matrix given
 	 * */
-	public static int[][] transposeMatrix(int [][] image){
-        int[][] transposed = new int[image[0].length][image.length];
-        for (int i = 0; i < image.length; i++)
-            for (int j = 0; j < image[0].length; j++)
-            	transposed[j][i] = image[i][j];
+	public static int[][] transposeMatrix(int [][] mat){
+        int[][] transposed = new int[mat[0].length][mat.length];
+        for (int i = 0; i < mat.length; i++)
+            for (int j = 0; j < mat[0].length; j++)
+            	transposed[j][i] = mat[i][j];
         return transposed;
     }
 	

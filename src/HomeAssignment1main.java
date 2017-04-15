@@ -12,7 +12,8 @@ public class HomeAssignment1main {
 	public static void main(String[] args){
 		
 		//for submission types TODO: maybe remove this?
-		boolean straight_seam = true;
+		boolean straight_seam = false;
+		int tmpcntforresize=0;
 		
 		if(args.length != 5){
 			System.out.println("ERROR: not enough arguments inserted");
@@ -57,7 +58,8 @@ public class HomeAssignment1main {
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer =  ImageUtils.Remove_seam(inputimagebuffer, energymatrix, 0);
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energymatrix, 0);
+						tmpcntforresize++;
 					}
 				}
 			}
