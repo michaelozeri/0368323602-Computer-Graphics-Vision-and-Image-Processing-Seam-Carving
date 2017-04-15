@@ -11,12 +11,16 @@ public class HomeAssignment1main {
 	
 	public static void main(String[] args){
 		
+		//for submission types TODO: maybe remove this?
+		boolean straight_seam = true;
+		
 		if(args.length != 5){
 			System.out.println("ERROR: not enough arguments inserted");
 			System.exit(0); //TODO: check if o.k to exit like this	
 		}
 		
-		int originalnumofrows = 0,originalnumofcolumns=0;
+		int originalnumofrows = 0;
+		int originalnumofcolumns=0;
 		
 		//Full path to the input image
 		String inputimagepath = args[0];
@@ -44,9 +48,17 @@ public class HomeAssignment1main {
 			
 			//check how much to resize vertically
 			int resizenumber = originalnumofcolumns - outputnumcolumns;
-			if (resizenumber > 0){ // if we need to reduce vertical seam's
-				for(;resizenumber>0;resizenumber--){
-					inputimagebuffer =  ImageUtils.Remove_seam(inputimagebuffer, energymatrix, 0);
+			
+			// if we need to reduce vertical seam's
+			if (resizenumber > 0){
+				if(straight_seam){
+					for(;resizenumber>0;resizenumber--){
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energymatrix, resizenumber);
+					}
+				}else{
+					for(;resizenumber>0;resizenumber--){
+						inputimagebuffer =  ImageUtils.Remove_seam(inputimagebuffer, energymatrix, 0);
+					}
 				}
 			}
 			else if(resizenumber < 0){ // need to add vertical seams's

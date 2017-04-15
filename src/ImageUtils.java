@@ -3,13 +3,16 @@ import java.awt.Color;
 
 
 public class ImageUtils {
-	
-	public static int[][] Calculate_Energy(BufferedImage image,int energytype){
-		
+	/*
+	 * this function calculates the energy matrix for the image given as 'image'
+	 * @param energytype - means how to calculate the energy (with / without local entropy
+	 * @return 'energymatrix' - the energy matrix of the image given
+	 * */
+	public static int[][] Calculate_Energy(BufferedImage image,int energytype){ 
 		int m = image.getWidth();
 		int n = image.getHeight();
 		int energy_ij = 0,valcount=0;;
-		int[][] rgbmat = rgbMatrix(image);//returns Matrix of rgb colors
+		int[][] rgbmat = rgbMatrix(image);//returns Matrix of RGB colors
 		int[][] energymatrix = new int[m][n];
 		
 		for(int i=0;i<m;i++){
@@ -22,7 +25,7 @@ public class ImageUtils {
 						}
 					}
 				}
-				energy_ij/=valcount;
+				energy_ij/=valcount; //TODO: Dor to fix this... - there is a devide by 0 happening here at first iteration
 				energymatrix[i][j] = energy_ij;
 				energy_ij = 0;
 				valcount = 0;
@@ -35,7 +38,10 @@ public class ImageUtils {
 		
 		return energymatrix;
 	}
-	//gets an image and evaluates the rgb matrix
+	
+	/*
+	 * gets an image and evaluates the RGB matrix
+	 * */
 	private static int[][] rgbMatrix(BufferedImage image){
 		int m = image.getWidth();
 		int n = image.getHeight();
@@ -47,6 +53,10 @@ public class ImageUtils {
 		}
 		return rgbmat;
 	}
+	
+	/*
+	 * removes a general seam as described in the Assignment
+	 * */
 	public static BufferedImage Remove_seam(BufferedImage originalimage, int[][] energymat,int seamtype){
 		
 		//create new image
@@ -54,7 +64,11 @@ public class ImageUtils {
 		
 		return newimage;
 	}
-	public static BufferedImage Remove_straight_seam(String outputfilename, BufferedImage originalimage,int[][] energymat,int[][] rgbmat, int colToReduce){
+	
+	/*
+	 * removes a straight seam from the image for the 'straight_seam' implementation
+	 * */
+	public static BufferedImage Remove_straight_seam(BufferedImage originalimage,int[][] energymat, int colToReduce){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
 		int minIntVal = Integer.MAX_VALUE + 1;
@@ -82,6 +96,10 @@ public class ImageUtils {
 		return newImage;
 	}
 
+	/*
+	 * this function is called in case we want to add the local entropy to the energy function
+	 * @return the energy matrix with local entropy
+	 * */
 	private static void Calculate_Hi(int[][] matrix,int[][] rgbmat,int n,int m){
 		int[][] pmnMat = Calculate_pmn(rgbmat,n, m);
 		for(int i=0;i<m;i++){
@@ -98,7 +116,10 @@ public class ImageUtils {
 			}
 		}	
 	}
-	//gets an rgb matrix and evaluates the pmn for each pixel
+	
+	/*
+	 * gets an RGB matrix and evaluates the pmn for each pixel
+	 * */
 	private static int[][] Calculate_pmn(int[][] rgbmat,int n,int m){
 		int[][] greyscaleMat = grayScale(rgbmat,n, m);
 		int[][] pmnMat = new int[m][n];
@@ -117,11 +138,21 @@ public class ImageUtils {
 		}
 		return pmnMat;
 	}
+	
+	/*
+	 * this function calculates the distance between two RGB points (which are int's)
+	 * as described in the Assignment
+	 * @return int - the distance between the two points
+	 * */
 	private static int Calculate_distance(int orig,int second){
 		Color one = new Color(orig);
 		Color two = new Color(second);
 		return (Math.abs(one.getRed()-two.getRed())+Math.abs(one.getBlue()-two.getBlue())+Math.abs(one.getGreen()-two.getGreen()))/3;
 	}
+	
+	/*
+	 * 
+	 * */
 	public static int[][] transposeMatrix(int [][] image){
         int[][] transposed = new int[image[0].length][image.length];
         for (int i = 0; i < image.length; i++)
@@ -129,6 +160,7 @@ public class ImageUtils {
             	transposed[j][i] = image[i][j];
         return transposed;
     }
+	
 	public static int[][] calcuateMinSeam(int [][] energy){
 		int[][] minSeam = new int[energy[0].length][energy.length];
 		for (int i = 1; i < energy.length; i++)//go through every row
@@ -145,6 +177,7 @@ public class ImageUtils {
         return minSeam;
 		
 	}
+	
 	public static int[][] calcuateStraightSeam(int [][] energy){
 		int[][] straightsSeam = new int[energy[0].length][energy.length];
 		for (int i = 1; i < energy.length; i++)//go through every row
@@ -153,7 +186,10 @@ public class ImageUtils {
         return straightsSeam;
 		
 	}
-	//gets an rgb image and evaluates the greyscale matrix
+	
+	/*
+	 * this function gets an RGB image and evaluates the grey scale matrix
+	 * */
 	private static int[][] grayScale(int[][] rgbmat,int n, int m) {
 		int[][] greyscaleMat = new int[n][m];
 		for(int i=0; i<n; i++){
