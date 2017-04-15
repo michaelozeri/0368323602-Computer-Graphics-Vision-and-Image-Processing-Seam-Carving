@@ -41,11 +41,14 @@ public class HomeAssignment1main {
 		try{
 			File inputimagefile = new File(inputimagepath);
 			BufferedImage inputimagebuffer = ImageIO.read(inputimagefile);
-			originalnumofrows =  inputimagebuffer.getWidth();
-			originalnumofcolumns =  inputimagebuffer.getHeight();
+			originalnumofrows =  inputimagebuffer.getHeight();
+			originalnumofcolumns =  inputimagebuffer.getWidth();
 			
+			/* TODO: changed accoarding to forum - maybe return this
 			//compute energy of image
-			int[][] energymatrix  = ImageUtils.Calculate_Energy(inputimagebuffer, energytype);
+			int[][] energymatrix  = ImageUtils.Calculate_Energy(inputimagebuffer, energytype);*/
+			int[][] energymatrix = new int[5][5]; //TODO: remove this. only for dor's function
+			
 			
 			//check how much to resize vertically
 			int resizenumber = originalnumofcolumns - outputnumcolumns;
@@ -58,8 +61,7 @@ public class HomeAssignment1main {
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energymatrix, 0);
-						tmpcntforresize++;
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, 0);
 					}
 				}
 			}
@@ -70,7 +72,7 @@ public class HomeAssignment1main {
 			//TODO: part 2 - flip, remove / add seam's
 			
 			File outputimagefile = new File(outputimagepath);
-			ImageIO.write(inputimagebuffer, "png", outputimagefile); //TODO: check return value
+			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); //TODO: check return value
 			
 		}catch (IOException e){
 			System.out.println("IOException: "+e.getMessage());

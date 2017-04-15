@@ -1,16 +1,52 @@
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.awt.Color;
+import java.io.BufferedWriter; //TODO: remove these are for logger
+import java.io.FileWriter; //TODO: remove these are for logger
 
 
 public class ImageUtils {
+	
+	public static boolean log = false;
+	/*
+	 * prints the mat into a log file for debug purposes
+	 * */
+	private static void PrintMat(int[][] mat,String filename){
+		if(log){
+			try{
+				FileWriter f = new FileWriter("C:\\Users\\mozeri\\Downloads\\"+filename+".txt");
+				BufferedWriter bf = new BufferedWriter(f);
+				bf.write("******* the matrix *********\n");
+				for (int i = 0; i < mat.length; i++) {
+					for (int j = 0; j < mat[0].length; j++) {
+					    if(mat[i][j] == Integer.MAX_VALUE){
+					    	bf.write("XXX ");
+					    }
+						else if(mat[i][j] >99){
+							bf.write(mat[i][j] + " ");
+						}else if((mat[i][j] <100)&&(mat[i][j]>9)){
+							bf.write(mat[i][j] + "  ");
+						}else{
+							bf.write(mat[i][j] + "   ");
+						}
+					}
+					bf.write("\n");
+				}
+				bf.write("****** end of log *******\n");
+				bf.close();
+			}catch (Exception e){
+				System.out.println("ERROR: "+e.getMessage());
+			}
+		}
+	}
 	/*
 	 * this function calculates the energy matrix for the image given as 'image'
 	 * @param energytype - means how to calculate the energy (with / without local entropy
 	 * @return 'energymatrix' - the energy matrix of the image given
 	 * */
 	public static int[][] Calculate_Energy(BufferedImage image,int energytype){ 
-		int m = image.getWidth();
-		int n = image.getHeight();
+		int m = image.getHeight();
+		int n = image.getWidth();
 		int energy_ij = 0,valcount=0;;
 		int[][] rgbmat = rgbMatrix(image);//returns Matrix of RGB colors
 		int[][] energymatrix = new int[m][n];
@@ -43,12 +79,12 @@ public class ImageUtils {
 	 * gets an image and evaluates the RGB matrix
 	 * */
 	private static int[][] rgbMatrix(BufferedImage image){
-		int m = image.getWidth();
-		int n = image.getHeight();
+		int m = image.getHeight();
+		int n = image.getWidth();
 		int[][] rgbmat = new int[m][n];
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
-				rgbmat[i][j] = image.getRGB(i, j);
+				rgbmat[i][j] = image.getRGB(j, i);
 			}
 		}
 		return rgbmat;
@@ -57,10 +93,16 @@ public class ImageUtils {
 	/*
 	 * removes a general seam as described in the Assignment
 	 * */
-	public static BufferedImage remove_General_seam(BufferedImage originalimage, int[][] energymat,int seamtype){
+	public static BufferedImage remove_General_seam(BufferedImage originalimage,int seamtype){
+		
+		int rows = originalimage.getHeight();
+		int cols = originalimage.getWidth();
+		
+		int[][] energymat = Calculate_Energy(originalimage, 0);
 		
 		//calculate pixel attribute
 		int[][] atrib = CalcPixelAttribute(energymat);
+		PrintMat(atrib, "atributefirst");
 		
 		//calculate minimal seam path - vector representing indexes
 		int[] seam = CalculateGeneralSeam(atrib);
@@ -70,15 +112,21 @@ public class ImageUtils {
 		
 		int k=0; //i of new mat
 		int l=0; //j of new mat
-		//copy only wanted pixels
-		for (int i = 0; i < originalimage.getWidth(); i++) {
-			for (int j = 0; j < originalimage.getHeight(); j++) {
-				if(j == seam[i]){
+		
+		/*
+		for (int z = 0; z < seam.length; z++) {
+			System.out.print(z + ":[" + seam[z]+"] ");
+		}
+		System.out.println("");*/
+		
+		//copy only wanted pixels to new picture
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				if(j == seam[rows-1-i]){
 					continue;
-				}else{
-					newImage.setRGB(k, l, originalimage.getRGB(i, j));
-					l++;
 				}
+				newImage.setRGB(l, k, originalimage.getRGB(j, i));
+				l++;
 			}
 			l=0;
 			k++;
@@ -91,14 +139,14 @@ public class ImageUtils {
 	/*
 	 * calculates the pixel attribute before calculating seam path
 	 * */
-	public static int[][] CalcPixelAttribute(int[][] energymatrix){
+	private static int[][] CalcPixelAttribute(int[][] energymatrix){
 		
 		int m = energymatrix.length; //m=rows
 		int n = energymatrix[0].length;
 		int tmpleft = Integer.MAX_VALUE;
 		int tmpmid = Integer.MAX_VALUE;
 		int tmpright = Integer.MAX_VALUE;;
-		int[][] atrib = new int[energymatrix.length][energymatrix[0].length];
+		int[][] atrib = new int[m][n];
 		for(int i=1;i<m;i++){
 			for (int j = 0; j < n; j++) {
 				//calculate energy values
@@ -119,7 +167,7 @@ public class ImageUtils {
 	/*
 	 * this function calculates the minimal seam to remove and returns it as a vector
 	 * */
-	public static int[] CalculateGeneralSeam(int[][] atrib){
+	private static int[] CalculateGeneralSeam(int[][] atrib){
 		
 		int rows = atrib.length; //m=rows
 		int cols = atrib[0].length;
@@ -133,6 +181,8 @@ public class ImageUtils {
 				minIndex = j;
 			}
 		}
+		atrib[rows-1][minIndex] = Integer.MAX_VALUE; //TODO: remove this
+		PrintMat(atrib,"log1"); //TODO: remove
 		seam[0] = minIndex;
 		int tmpleft = Integer.MAX_VALUE;
 		int tmpmid = Integer.MAX_VALUE;
@@ -146,14 +196,23 @@ public class ImageUtils {
 			}
 			tmpmid = atrib[rows-1-i][seam[i-1]];
 			min = Math.min(tmpleft, Math.min(tmpright, tmpmid));
-			if(min == tmpleft){
-				seam[i] = seam[i-1]-1;
-			}
-			else if(min == tmpmid){
+			if(min == tmpmid){
 				seam[i] = seam[i-1];
-			}else{
-				seam[i] = seam[i-1]+1;
+				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; //TODO: remove these three
 			}
+			else if(min == tmpleft){
+				seam[i] = seam[i-1]-1;
+				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; //TODO: remove these three
+			}
+			else{
+				seam[i] = seam[i-1]+1;
+				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; //TODO: remove these three
+			}
+			PrintMat(atrib,"log1"); //TODO: remove
+			//reset tmp values
+			tmpleft = Integer.MAX_VALUE;
+			tmpmid = Integer.MAX_VALUE;
+			tmpright = Integer.MAX_VALUE;
 		}
 		
 		return seam;
