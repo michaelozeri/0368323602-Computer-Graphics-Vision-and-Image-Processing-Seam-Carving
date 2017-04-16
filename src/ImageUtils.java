@@ -44,7 +44,8 @@ public class ImageUtils {
 	 * @param energytype - means how to calculate the energy (with / without local entropy
 	 * @return 'energymatrix' - the energy matrix of the image given
 	 * */
-	public static int[][] Calculate_Energy(BufferedImage image,int energytype){ 
+	public static int[][] Calculate_Energy(BufferedImage image,int energytype,boolean transpose){ 
+		
 		int m = image.getHeight();
 		int n = image.getWidth();
 		int energy_ij = 0,valcount=0;;
@@ -93,12 +94,12 @@ public class ImageUtils {
 	/*
 	 * removes a general seam as described in the Assignment
 	 * */
-	public static BufferedImage remove_General_seam(BufferedImage originalimage,int seamtype){
+	public static BufferedImage remove_General_seam(BufferedImage originalimage,int energytype,boolean transpose){
 		
 		int rows = originalimage.getHeight();
 		int cols = originalimage.getWidth();
 		
-		int[][] energymat = Calculate_Energy(originalimage, 0);
+		int[][] energymat = Calculate_Energy(originalimage, energytype,transpose); //TODO: in case of transpose calc energy of horizontal mat
 		
 		//calculate pixel attribute
 		int[][] atrib = CalcPixelAttribute(energymat);
@@ -112,12 +113,6 @@ public class ImageUtils {
 		
 		int k=0; //i of new mat
 		int l=0; //j of new mat
-		
-		/*
-		for (int z = 0; z < seam.length; z++) {
-			System.out.print(z + ":[" + seam[z]+"] ");
-		}
-		System.out.println("");*/
 		
 		//copy only wanted pixels to new picture
 		for (int i = 0; i < rows; i++) {
@@ -314,6 +309,10 @@ public class ImageUtils {
         return transposed;
     }
 	
+	
+	/*
+	 * this function calculates min seam for straight seam curving function
+	 * */
 	public static int[][] calcuateMinSeam(int [][] energy){
 		int[][] minSeam = new int[energy[0].length][energy.length];
 		for (int i = 1; i < energy.length; i++)//go through every row

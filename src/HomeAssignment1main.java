@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.math.*;
 
 
+
 public class HomeAssignment1main {
 	
 	public static void main(String[] args){
 		
+		long starttime = System.nanoTime(); //TODO: remove this
 		//for submission types TODO: maybe remove this?
 		boolean straight_seam = false;
 		int tmpcntforresize=0;
@@ -61,7 +63,7 @@ public class HomeAssignment1main {
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, 0);
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,false);
 					}
 				}
 			}
@@ -69,10 +71,34 @@ public class HomeAssignment1main {
 				//TODO: part 2, need to implement add function	
 			}
 			
-			//TODO: part 2 - flip, remove / add seam's
+			//resize horizontically TODO: finish this michael
+			/*
+			//check how much to resize vertically
+			resizenumber = originalnumofrows - outputnumrows;
+			
+			// if we need to reduce vertical seam's
+			if (resizenumber > 0){
+				if(straight_seam){
+					for(;resizenumber>0;resizenumber--){
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energymatrix, resizenumber);
+					}
+				}else{
+					for(;resizenumber>0;resizenumber--){
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,true);
+					}
+				}
+			}
+			else if(resizenumber < 0){ // need to add vertical seams's
+				//TODO: part 2, need to implement add function	
+			}
+			*/
 			
 			File outputimagefile = new File(outputimagepath);
 			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); //TODO: check return value
+			
+			long finishtime = System.nanoTime() - starttime; //TODO: remove this
+
+			System.out.println("Done in "+(finishtime/1000000000)/60 +" minutes!");
 			
 		}catch (IOException e){
 			System.out.println("IOException: "+e.getMessage());
