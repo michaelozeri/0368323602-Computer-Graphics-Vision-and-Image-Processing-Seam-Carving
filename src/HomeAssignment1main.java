@@ -53,7 +53,7 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype, resizenumber);
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
@@ -76,7 +76,7 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype, resizenumber);
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){

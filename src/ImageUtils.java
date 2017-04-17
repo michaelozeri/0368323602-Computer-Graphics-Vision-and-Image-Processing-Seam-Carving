@@ -218,35 +218,43 @@ public class ImageUtils {
 	/*
 	 * removes a straight seam from the image for the 'straight_seam' implementation
 	 * */
-	public static BufferedImage Remove_straight_seam(BufferedImage originalimage,int energytype, int colToReduce){
+	public static BufferedImage Remove_straight_seam(BufferedImage originalimage, int energytype){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
 		
-		double[][] energymat = Calculate_Energy(originalimage, energytype);
+		double[][] energymat = Calculate_Energy(originalimage, energytype); //TODO: in case of transpose calc energy of horizontal mat
+
+		double[] seam = calcuateStraightSeam(energymat);
 		
-		int minIntVal = Integer.MAX_VALUE + 1;
-		for(int i = 0; i<colToReduce;i++){
-			double min = energymat[n-1][0];
-			for(int j =1; j<m;j++){
-				double temp = energymat[n-1][j];
-				if(temp > minIntVal && temp<min){
-					for(int r = 0; r<n; r++){
-						energymat[r][j] = minIntVal;
-					}
-				}
+		
+		int minindex = 0;
+		double min = seam[0];
+		for(int j =1; j<m;j++){
+			double temp = energymat[n-1][j];
+			if(temp<min){
+				minindex = j;
 			}
 		}
-		BufferedImage newImage = new BufferedImage(n, m-colToReduce, originalimage.getType());
+		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
+		
 		for(int i=0; i<n; i++){
 	         
             for(int j=0; j<m; j++){
-            	if(energymat[i][j] == minIntVal){
+            	if(j == minindex){
             		continue;
             	}
                newImage.setRGB(i,j,originalimage.getRGB(i,j));
             }
          }
 		return newImage;
+	}
+	public static double[] calcuateStraightSeam(double [][] energy){
+		double[] straightsSeam = new double[energy[0].length];
+		for (int i = 1; i < energy.length; i++)//go through every row
+            for (int j = 0; j < energy[0].length; j++)//add the value of energy above
+            	straightsSeam[j] += energy[i-1][j];
+        return straightsSeam;
+		
 	}
 
 	/*
