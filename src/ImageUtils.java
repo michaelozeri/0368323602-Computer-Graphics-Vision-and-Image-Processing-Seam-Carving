@@ -238,12 +238,13 @@ public class ImageUtils {
 		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
 		
 		for(int i=0; i<n; i++){
-	         
+			int c = 0;
             for(int j=0; j<m; j++){
             	if(j == minindex){
             		continue;
             	}
-               newImage.setRGB(i,j,originalimage.getRGB(i,j));
+            	c++;
+                newImage.setRGB(c,i,originalimage.getRGB(j,i));
             }
          }
 		return newImage;
@@ -362,7 +363,7 @@ public class ImageUtils {
 	
 	public static BufferedImage add_single_seam_with_cuver(BufferedImage originalimage,double[][] energymat, int colToadd){
 		int m = originalimage.getWidth();
-		int n = originalimage.getHeight()+1;
+		int n = originalimage.getHeight();
 		double mindubVal = Double.MAX_VALUE+1;
 		for(int i = 0; i<colToadd;i++){
 			double min = energymat[n-1][0];
@@ -378,19 +379,19 @@ public class ImageUtils {
 		
 		BufferedImage newImage = new BufferedImage(n, m+colToadd, originalimage.getType());
 		for(int i=0; i<n; i++){
-	         
+	        int c =0;
             for(int j=0; j<m; j++){
-				newImage.setRGB(i,j,originalimage.getRGB(i,j));
+				newImage.setRGB(c,i,originalimage.getRGB(j,i));
             	if(energymat[i][j] == mindubVal){
-					j++;
-					double rgbval = originalimage.getRGB(i,j);
+					c++;
+					double rgbval = originalimage.getRGB(j,i);
 					if(j != n-1){
-						rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(i,j+1);
+						rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(j+1,1);
 					}
-            		newImage.setRGB(i,j,(int)rgbval); //TODO: check this is working
+            		newImage.setRGB(c,i,(int)rgbval); //TODO: check this is working
 					
             	}
-               
+                c++;
             }
          }
 		return newImage;
@@ -443,15 +444,15 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,double[]
 	
 	BufferedImage newImage = new BufferedImage(n, m+colToadd, originalimage.getType());
 	for(int i=0; i<n; i++){
-         
+        int c=0;
         for(int j=0; j<m; j++){
-			newImage.setRGB(i,j,originalimage.getRGB(i,j));
+			newImage.setRGB(c,i,originalimage.getRGB(j,i));
         	if(energymat[i][j] == mindubVal){
-				j++;
-        		newImage.setRGB(i,j,originalimage.getRGB(i,j));
+				c++;
+        		newImage.setRGB(c,i,originalimage.getRGB(j,i));
 				
         	}
-           
+            c++;
         }
      }
 	return newImage;
