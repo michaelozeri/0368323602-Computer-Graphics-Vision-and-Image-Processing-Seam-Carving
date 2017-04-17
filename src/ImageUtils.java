@@ -325,19 +325,43 @@ public class ImageUtils {
 	/*
 	 * this function calculates min seam for straight seam curving function
 	 * */
-	public static int[][] calcuate_Min_Seam(int [][] energy){
-		int[][] minSeam = new int[energy[0].length][energy.length];
-		for (int i = 1; i < energy.length; i++)//go through every row
-            for (int j = 0; j < energy[0].length; j++){//add the value of energy above
-            	if(j==0){
-            		minSeam[i][j] += Math.min(energy[i-1][j],energy[i-1][j+1]);
-            	}
-            	else if(j==energy[0].length-1){
-            		minSeam[i][j] += Math.min(energy[i-1][j],energy[i-1][j-1]);
-            	}
-            	else
-            		minSeam[i][j] += Math.min(energy[i-1][j],Math.min(energy[i-1][j-1],energy[i-1][j+1]));
-            }
+	public static double[][] calculate_Min_Seam(double [][] energy, int colToadd){
+		double[][] minSeam = calculate_Pixel_Attribute(energy);
+		int m = energy[0].length;
+		int n = energy.length;
+
+		double mindubVal = Double.MIN_VALUE;
+		for(int i = 0; i<colToadd;i++){
+			double min = minSeam[n-1][0];
+			int minindex = 0;
+			for(int j =1; j<m;j++){
+				double temp = minSeam[n-1][j];
+				if(temp > mindubVal && temp<min){
+					minindex = j;
+					min = temp;
+				}
+			}
+			minSeam[n-1][minindex] =mindubVal;
+			for(int r = n-1; r>0;r--){
+				if(minindex == 0){
+					if(minSeam[r-1][minindex]> minSeam[r-1][minindex+1])
+						minindex = minindex+1;
+				}
+				else if(minindex == n-1){
+					if(minSeam[r-1][minindex]> minSeam[r-1][minindex-1])
+						minindex = minindex-1;
+				}
+				else{
+					min = Math.min(minSeam[r-1][minindex-1], minSeam[r-1][minindex]);
+					min = Math.min(minSeam[r-1][minindex+1], min);
+					if(min == minSeam[r-1][minindex-1])
+						minindex = minindex-1;
+					else if(min == minSeam[r-1][minindex+1])
+							minindex = minindex+1;
+				}
+				minSeam[r-1][minindex] =mindubVal;
+			}
+		}
         return minSeam;
 		
 	}
@@ -359,31 +383,25 @@ public class ImageUtils {
 		return greyscaleMat; 
 	}
 	
-	public static BufferedImage add_single_seam_with_cuver(BufferedImage originalimage,double[][] energymat, int colToadd){
+	public static BufferedImage add_single_seam_with_cuver(BufferedImage originalimage,int energytype, int colToadd){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
-		double mindubVal = Double.MAX_VALUE+1;
-		for(int i = 0; i<colToadd;i++){
-			double min = energymat[n-1][0];
-			for(int j =1; j<m;j++){
-				double temp = energymat[n-1][j];
-				if(temp > mindubVal && temp<min){
-					for(int r = 0; r<n; r++){
-						energymat[r][j] = mindubVal;
-					}
-				}
-			}
-		}
+		double mindubVal = Double.MIN_VALUE;
+		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
-		BufferedImage newImage = new BufferedImage(n, m+colToadd, originalimage.getType());
+		//calculate min sim attribute
+		double[][] seam = calculate_Min_Seam(energymat, colToadd);
+
+
+		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
 		for(int i=0; i<n; i++){
 	        int c =0;
             for(int j=0; j<m; j++){
 				newImage.setRGB(c,i,originalimage.getRGB(j,i));
-            	if(energymat[i][j] == mindubVal){
+            	if(seam[i][j] == mindubVal){
 					c++;
 					double rgbval = originalimage.getRGB(j,i);
-					if(j != n-1){
+					if(j != m-1){		
 						rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(j+1,1);
 					}
             		newImage.setRGB(c,i,(int)rgbval); //TODO: check this is working
@@ -424,30 +442,24 @@ public class ImageUtils {
 		
 	}
 
-public static BufferedImage add_single_seam(BufferedImage originalimage,double[][] energymat, int colToadd){
+public static BufferedImage add_single_seam(BufferedImage originalimage,int energytype, int colToadd){
 	int m = originalimage.getWidth();
 	int n = originalimage.getHeight();
-	double mindubVal = Double.MAX_VALUE+1;
-	for(int i = 0; i<colToadd;i++){
-		double min = energymat[n-1][0];
-		for(int j =1; j<m;j++){
-			double temp = energymat[n-1][j];
-			if(temp > mindubVal && temp<min){
-				for(int r = 0; r<n; r++){
-					energymat[r][j] = mindubVal;
-				}
-			}
-		}
-	}
+	double mindubVal = Double.MIN_VALUE;
+	double[][] energymat = calculate_Energy(originalimage, energytype); 
 	
-	BufferedImage newImage = new BufferedImage(n, m+colToadd, originalimage.getType());
+	//calculate min sim attribute
+	double[][] seam = calculate_Min_Seam(energymat, colToadd);
+
+
+	BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
 	for(int i=0; i<n; i++){
-        int c=0;
+        int c =0;
         for(int j=0; j<m; j++){
 			newImage.setRGB(c,i,originalimage.getRGB(j,i));
-        	if(energymat[i][j] == mindubVal){
+        	if(seam[i][j] == mindubVal){
 				c++;
-        		newImage.setRGB(c,i,originalimage.getRGB(j,i));
+        		newImage.setRGB(c,i,originalimage.getRGB(j,i)); //TODO: check this is working
 				
         	}
             c++;
@@ -473,5 +485,7 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,double[]
 	
 	
 }
+
+
 
 

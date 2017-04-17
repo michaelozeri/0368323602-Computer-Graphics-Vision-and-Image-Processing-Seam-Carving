@@ -64,6 +64,7 @@ public class HomeAssignment1main {
 			}
 			// need to add vertical seams's
 			else if(resizenumber < 0){ 
+				inputimagebuffer = ImageUtils.add_single_seam_with_cuver(inputimagebuffer, energytype, -resizenumber);
 				//TODO: part 2, need to implement add function	
 			}
 			
