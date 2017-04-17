@@ -16,7 +16,7 @@ public class ImageUtils {
 	private static void PrintMat(double[][] mat,String filename){ //TODO: fix logger
 		if(log){
 			try{
-				FileWriter f = new FileWriter("C:\\Users\\mozeri\\Downloads\\"+filename+".txt");
+				FileWriter f = new FileWriter(filename+".txt");
 				BufferedWriter bf = new BufferedWriter(f);
 				bf.write("******* the matrix *********\n");
 				for (int i = 0; i < mat.length; i++) {
@@ -243,17 +243,18 @@ public class ImageUtils {
             	if(j == minindex){
             		continue;
             	}
-            	c++;
+            	
                 newImage.setRGB(c,i,originalimage.getRGB(j,i));
+                c++;
             }
          }
 		return newImage;
 	}
 	public static double[] calcuateStraightSeam(double [][] energy){
 		double[] straightsSeam = new double[energy[0].length];
-		for (int i = 1; i < energy.length; i++)//go through every row
+		for (int i = 0; i < energy.length; i++)//go through every row
             for (int j = 0; j < energy[0].length; j++)//add the value of energy above
-            	straightsSeam[j] += energy[i-1][j];
+            	straightsSeam[j] += energy[i][j];
         return straightsSeam;
 		
 	}
@@ -332,17 +333,7 @@ public class ImageUtils {
 		
 	}
 	
-	/*
-	 * calculate a straight seam from the matrix energy
-	 * */
-	public static int[][] calcuateStraightSeam(int [][] energy){
-		int[][] straightsSeam = new int[energy[0].length][energy.length];
-		for (int i = 1; i < energy.length; i++)//go through every row
-            for (int j = 0; j < energy[0].length; j++)//add the value of energy above
-            	straightsSeam[i][j] += energy[i-1][j];
-        return straightsSeam;
-		
-	}
+
 	
 	/*
 	 * this function gets an RGB image and evaluates the grey scale matrix
