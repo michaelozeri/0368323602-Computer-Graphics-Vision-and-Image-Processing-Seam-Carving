@@ -53,7 +53,7 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype);
+						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
@@ -67,7 +67,7 @@ public class HomeAssignment1main {
 				//TODO: part 2, need to implement add function	
 			}
 			
-			inputimagebuffer = ImageUtils.TransposeImage(inputimagebuffer);
+			inputimagebuffer = ImageUtils.transpose_Image(inputimagebuffer);
 			
 			//check how much to resize vertically
 			resizenumber = originalnumofrows - outputnumrows;
@@ -76,7 +76,7 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype);
+						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
@@ -91,7 +91,7 @@ public class HomeAssignment1main {
 			}
 			
 			
-			inputimagebuffer = ImageUtils.TransposeImage(inputimagebuffer);
+			inputimagebuffer = ImageUtils.transpose_Image(inputimagebuffer);
 			
 			File outputimagefile = new File(outputimagepath);
 			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); //TODO: check return value

@@ -7,14 +7,14 @@ import java.io.FileWriter; //TODO: remove these are for logger
 public class ImageUtils {
 	
 	
-	// a boolean deciding wheather to log or not
-	public static boolean log = false;
+	// a boolean deciding if to log or not
+	public static boolean m_log = false;
 	
 	/*
 	 * prints the mat into a log file for debug purposes
 	 * */
-	private static void PrintMat(double[][] mat,String filename){ //TODO: fix logger
-		if(log){
+	private static void print_Mat_To_Logfile(double[][] mat,String filename){ 
+		if(m_log){
 			try{
 				FileWriter f = new FileWriter(filename+".txt");
 				BufferedWriter bf = new BufferedWriter(f);
@@ -41,12 +41,13 @@ public class ImageUtils {
 			}
 		}
 	}
+	
 	/*
 	 * this function calculates the energy matrix for the image given as 'image'
 	 * @param energytype - means how to calculate the energy (with / without local entropy
 	 * @return 'energymatrix' - the energy matrix of the image given
 	 * */
-	public static double[][] Calculate_Energy(BufferedImage image,int energytype){ 
+	public static double[][] calculate_Energy(BufferedImage image,int energytype){ 
 		
 		int m = image.getHeight();
 		int n = image.getWidth();
@@ -60,7 +61,7 @@ public class ImageUtils {
 					for(int l = Math.max(j-1, 0); l<Math.min(j+2, n);l++){
 						if(i != k || l!=j){
 							valcount++;
-							energy_ij += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
+							energy_ij += calculate_Distance(rgbmat[i][j], rgbmat[k][l]);	
 						}
 					}
 				}
@@ -71,8 +72,8 @@ public class ImageUtils {
 			}
 		}
 		
-		if(energytype>=1){ //TODO: is this o.k for energy type of 2?
-			Calculate_Hi(energymatrix,rgbmat, n, m);
+		if(energytype>=1){ 
+			calculate_Hi(energymatrix,rgbmat, n, m);
 		}
 		
 		return energymatrix;
@@ -101,14 +102,14 @@ public class ImageUtils {
 		int rows = originalimage.getHeight();
 		int cols = originalimage.getWidth();
 		
-		double[][] energymat = Calculate_Energy(originalimage, energytype); 
+		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
 		//calculate pixel attribute
-		double[][] atrib = CalcPixelAttribute(energymat);
-		PrintMat(atrib, "atributefirst");
+		double[][] atrib = calculate_Pixel_Attribute(energymat);
+		print_Mat_To_Logfile(atrib, "atributefirst");
 		
 		//calculate minimal seam path - vector representing indexes
-		int[] seam = CalculateGeneralSeam(atrib);
+		int[] seam = calculate_General_Seam(atrib);
 		
 		//create new image with one less column (width-1)
 		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
@@ -136,7 +137,7 @@ public class ImageUtils {
 	/*
 	 * calculates the pixel attribute before calculating seam path
 	 * */
-	private static double[][] CalcPixelAttribute(double[][] energymatrix){
+	private static double[][] calculate_Pixel_Attribute(double[][] energymatrix){
 		
 		int m = energymatrix.length; //m=rows
 		int n = energymatrix[0].length;
@@ -164,7 +165,7 @@ public class ImageUtils {
 	/*
 	 * this function calculates the minimal seam to remove and returns it as a vector
 	 * */
-	private static int[] CalculateGeneralSeam(double[][] atrib){
+	private static int[] calculate_General_Seam(double[][] atrib){
 		
 		int rows = atrib.length; //m=rows
 		int cols = atrib[0].length;
@@ -179,7 +180,7 @@ public class ImageUtils {
 			}
 		}
 		atrib[rows-1][minIndex] = Integer.MAX_VALUE; //TODO: remove this
-		PrintMat(atrib,"log1"); //TODO: remove
+		print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
 		seam[0] = minIndex;
 		double tmpleft = Integer.MAX_VALUE;
 		double tmpmid = Integer.MAX_VALUE;
@@ -205,36 +206,40 @@ public class ImageUtils {
 				seam[i] = seam[i-1]+1;
 				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; //TODO: remove these three
 			}
-			PrintMat(atrib,"log1"); //TODO: remove
+			print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
 			//reset tmp values
 			tmpleft = Integer.MAX_VALUE;
 			tmpmid = Integer.MAX_VALUE;
 			tmpright = Integer.MAX_VALUE;
 		}
-		
 		return seam;
 	}
 	
 	/*
 	 * removes a straight seam from the image for the 'straight_seam' implementation
 	 * */
-	public static BufferedImage Remove_straight_seam(BufferedImage originalimage, int energytype){
+	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype){
+		
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
 		
-		double[][] energymat = Calculate_Energy(originalimage, energytype); //TODO: in case of transpose calc energy of horizontal mat
+		//calculate the energy matrix
+		double[][] energymat = calculate_Energy(originalimage, energytype);
 
-		double[] seam = calcuateStraightSeam(energymat);
+		//calculate a vector that each index holds the column seam value
+		double[] seamVector = calcuate_Straight_Seam(energymat);
 		
-		
+		//choose the minimum seam to remove from the seam vector
 		int minindex = 0;
-		double min = seam[0];
+		double min = seamVector[0];
 		for(int j =1; j<m;j++){
-			double temp = energymat[n-1][j];
+			double temp = seamVector[j];
 			if(temp<min){
 				minindex = j;
+				min = seamVector[j];
 			}
 		}
+		
 		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
 		
 		for(int i=0; i<n; i++){
@@ -243,28 +248,32 @@ public class ImageUtils {
             	if(j == minindex){
             		continue;
             	}
-            	
                 newImage.setRGB(c,i,originalimage.getRGB(j,i));
                 c++;
             }
          }
 		return newImage;
 	}
-	public static double[] calcuateStraightSeam(double [][] energy){
+	
+	/*
+	 * this function calculates the straight seam to be removed by summing
+	 * each column to a double value
+	 * */
+	public static double[] calcuate_Straight_Seam(double [][] energy){
+		//value per each column
 		double[] straightsSeam = new double[energy[0].length];
 		for (int i = 0; i < energy.length; i++)//go through every row
             for (int j = 0; j < energy[0].length; j++)//add the value of energy above
             	straightsSeam[j] += energy[i][j];
         return straightsSeam;
-		
 	}
 
 	/*
 	 * this function is called in case we want to add the local entropy to the energy function
 	 * @return the energy matrix with local entropy
 	 * */
-	private static void Calculate_Hi(double[][] matrix,int[][] rgbmat,int n,int m){
-		double[][] pmnMat = Calculate_pmn(rgbmat,n, m);
+	private static void calculate_Hi(double[][] matrix,int[][] rgbmat,int n,int m){
+		double[][] pmnMat = calculate_pmn(rgbmat,n, m);
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
 				double hi = 0;
@@ -283,7 +292,7 @@ public class ImageUtils {
 	/*
 	 * gets an RGB matrix and evaluates the pmn for each pixel
 	 * */
-	private static double[][] Calculate_pmn(int[][] rgbmat,int n,int m){
+	private static double[][] calculate_pmn(int[][] rgbmat,int n,int m){
 		int[][] greyscaleMat = grayScale(rgbmat,n, m);
 		double[][] pmnMat = new double[m][n];
 		for(int i=0;i<m;i++){
@@ -292,7 +301,7 @@ public class ImageUtils {
 				for(int k = Math.max(i-4, 0); k<Math.min(i+5, m);k++){
 					for(int l = Math.max(j-4, 0); l<Math.min(j+5, n);l++){
 						if(i != k || l!=j){
-							temppmn += Calculate_distance(rgbmat[i][j], rgbmat[k][l]);	
+							temppmn += calculate_Distance(rgbmat[i][j], rgbmat[k][l]);	
 						}
 					}
 				}
@@ -307,7 +316,7 @@ public class ImageUtils {
 	 * as described in the Assignment
 	 * @return int - the distance between the two points
 	 * */
-	private static int Calculate_distance(int orig,int second){
+	private static int calculate_Distance(int orig,int second){
 		Color one = new Color(orig);
 		Color two = new Color(second);
 		return (Math.abs(one.getRed()-two.getRed())+Math.abs(one.getBlue()-two.getBlue())+Math.abs(one.getGreen()-two.getGreen()))/3;
@@ -316,7 +325,7 @@ public class ImageUtils {
 	/*
 	 * this function calculates min seam for straight seam curving function
 	 * */
-	public static int[][] calcuateMinSeam(int [][] energy){
+	public static int[][] calcuate_Min_Seam(int [][] energy){
 		int[][] minSeam = new int[energy[0].length][energy.length];
 		for (int i = 1; i < energy.length; i++)//go through every row
             for (int j = 0; j < energy[0].length; j++){//add the value of energy above
@@ -332,8 +341,6 @@ public class ImageUtils {
         return minSeam;
 		
 	}
-	
-
 	
 	/*
 	 * this function gets an RGB image and evaluates the grey scale matrix
@@ -452,7 +459,7 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,double[]
 /*
  * transpose's the image
  * */
-	public static BufferedImage TransposeImage(BufferedImage img){
+	public static BufferedImage transpose_Image(BufferedImage img){
 		int m = img.getHeight();
 		int n = img.getWidth();
 		BufferedImage retimg = new BufferedImage(m, n, img.getType());
