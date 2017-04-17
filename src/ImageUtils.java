@@ -6,7 +6,10 @@ import java.io.FileWriter; //TODO: remove these are for logger
 
 public class ImageUtils {
 	
+	
+	// a boolean deciding wheather to log or not
 	public static boolean log = false;
+	
 	/*
 	 * prints the mat into a log file for debug purposes
 	 * */
@@ -48,7 +51,7 @@ public class ImageUtils {
 		int m = image.getHeight();
 		int n = image.getWidth();
 		double energy_ij = 0,valcount=0;;
-		int[][] rgbmat = rgbMatrix(image);//returns Matrix of RGB colors
+		int[][] rgbmat = rgbMatrix(image); //returns Matrix of RGB colors
 		double[][] energymatrix = new double[m][n];
 		
 		for(int i=0;i<m;i++){
@@ -67,6 +70,7 @@ public class ImageUtils {
 				valcount = 0;
 			}
 		}
+		
 		
 		if(energytype>=1){ //TODO: is this o.k for energy type of 2?
 			Calculate_Hi(energymatrix,rgbmat, n, m);
@@ -296,19 +300,7 @@ public class ImageUtils {
 		Color two = new Color(second);
 		return (Math.abs(one.getRed()-two.getRed())+Math.abs(one.getBlue()-two.getBlue())+Math.abs(one.getGreen()-two.getGreen()))/3;
 	}
-	
-	/*
-	 * transposes the matrix given
-	 * */
-	public static int[][] transposeMatrix(int [][] mat){
-        int[][] transposed = new int[mat[0].length][mat.length];
-        for (int i = 0; i < mat.length; i++)
-            for (int j = 0; j < mat[0].length; j++)
-            	transposed[j][i] = mat[i][j];
-        return transposed;
-    }
-	
-	
+		
 	/*
 	 * this function calculates min seam for straight seam curving function
 	 * */
@@ -345,14 +337,14 @@ public class ImageUtils {
 	 * this function gets an RGB image and evaluates the grey scale matrix
 	 * */
 	private static int[][] grayScale(int[][] rgbmat,int n, int m) {
-		int[][] greyscaleMat = new int[n][m];
-		for(int i=0; i<n; i++){
-	    	for(int j=0; j<m; j++){
+		int[][] greyscaleMat = new int[m][n];
+		for(int i=0; i<m; i++){
+	    	for(int j=0; j<n; j++){
 	    		Color c = new Color(rgbmat[i][j]);
 	            int red = (int)(c.getRed() * 0.299);
 	            int green = (int)(c.getGreen() * 0.587);
-	            int blue = (int)(c.getBlue() *0.114);
-	            greyscaleMat[n][m] = red+green+blue;
+	            int blue = (int)(c.getBlue() * 0.114);
+	            greyscaleMat[i][j] = red+green+blue;
 	        }
 	    }
 		return greyscaleMat; 
@@ -454,7 +446,22 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,double[]
      }
 	return newImage;
 }
-	
+
+/*
+ * transpose's the image
+ * */
+	public static BufferedImage TransposeImage(BufferedImage img){
+		int m = img.getHeight();
+		int n = img.getWidth();
+		BufferedImage retimg = new BufferedImage(m, n, img.getType());
+		int temp;
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				retimg.setRGB(i, j, img.getRGB(j, i));
+			}
+		}
+		return retimg;
+	}
 	
 	
 }

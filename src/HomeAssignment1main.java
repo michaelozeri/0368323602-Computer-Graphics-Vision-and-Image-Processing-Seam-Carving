@@ -60,6 +60,7 @@ public class HomeAssignment1main {
 				}else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,false);
+						System.out.println("finished removing vertical seam");
 					}
 				}
 			}
@@ -67,8 +68,8 @@ public class HomeAssignment1main {
 				//TODO: part 2, need to implement add function	
 			}
 			
-			//resize horizontically TODO: finish this michael
-			/*
+			inputimagebuffer = ImageUtils.TransposeImage(inputimagebuffer);
+			
 			//check how much to resize vertically
 			resizenumber = originalnumofrows - outputnumrows;
 			
@@ -81,13 +82,16 @@ public class HomeAssignment1main {
 				}else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,true);
+						System.out.println("finished removing hotrizontal seam");
 					}
 				}
 			}
 			else if(resizenumber < 0){ // need to add vertical seams's
 				//TODO: part 2, need to implement add function	
 			}
-			*/
+			
+			
+			inputimagebuffer = ImageUtils.TransposeImage(inputimagebuffer);
 			
 			File outputimagefile = new File(outputimagepath);
 			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); //TODO: check return value
