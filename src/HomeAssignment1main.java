@@ -14,7 +14,7 @@ public class HomeAssignment1main {
 		
 		long starttime = System.nanoTime(); //TODO: remove this
 		//for submission types TODO: maybe remove this?
-		boolean straight_seam = false;
+		boolean straight_seam = true;
 		int tmpcntforresize=0;
 		
 		if(args.length != 5){
@@ -45,9 +45,7 @@ public class HomeAssignment1main {
 			BufferedImage inputimagebuffer = ImageIO.read(inputimagefile);
 			originalnumofrows =  inputimagebuffer.getHeight();
 			originalnumofcolumns =  inputimagebuffer.getWidth();
-			
-			int[][] energymatrix = new int[5][5]; //TODO: remove this. only for dor's function
-			
+						
 			//check how much to resize vertically
 			int resizenumber = originalnumofcolumns - outputnumcolumns;
 			
@@ -55,16 +53,17 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energymatrix, resizenumber);
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype, resizenumber);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,false);
-						System.out.println("finished removing vertical seam");
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
+						//System.out.println("finished removing vertical seam");
 					}
 				}
 			}
-			else if(resizenumber < 0){ // need to add vertical seams's
+			// need to add vertical seams's
+			else if(resizenumber < 0){ 
 				//TODO: part 2, need to implement add function	
 			}
 			
@@ -77,16 +76,17 @@ public class HomeAssignment1main {
 			if (resizenumber > 0){
 				if(straight_seam){
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energymatrix, resizenumber);
+						inputimagebuffer = ImageUtils.Remove_straight_seam(inputimagebuffer, energytype, resizenumber);
 					}
 				}else{
 					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype,true);
-						System.out.println("finished removing hotrizontal seam");
+						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
+						//System.out.println("finished removing hotrizontal seam");
 					}
 				}
 			}
-			else if(resizenumber < 0){ // need to add vertical seams's
+			// need to add vertical seams's
+			else if(resizenumber < 0){ 
 				//TODO: part 2, need to implement add function	
 			}
 			

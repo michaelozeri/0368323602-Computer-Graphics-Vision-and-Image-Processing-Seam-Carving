@@ -46,7 +46,7 @@ public class ImageUtils {
 	 * @param energytype - means how to calculate the energy (with / without local entropy
 	 * @return 'energymatrix' - the energy matrix of the image given
 	 * */
-	public static double[][] Calculate_Energy(BufferedImage image,int energytype,boolean transpose){ 
+	public static double[][] Calculate_Energy(BufferedImage image,int energytype){ 
 		
 		int m = image.getHeight();
 		int n = image.getWidth();
@@ -70,7 +70,6 @@ public class ImageUtils {
 				valcount = 0;
 			}
 		}
-		
 		
 		if(energytype>=1){ //TODO: is this o.k for energy type of 2?
 			Calculate_Hi(energymatrix,rgbmat, n, m);
@@ -97,12 +96,12 @@ public class ImageUtils {
 	/*
 	 * removes a general seam as described in the Assignment
 	 * */
-	public static BufferedImage remove_General_seam(BufferedImage originalimage,int energytype,boolean transpose){
+	public static BufferedImage remove_General_seam(BufferedImage originalimage,int energytype){
 		
 		int rows = originalimage.getHeight();
 		int cols = originalimage.getWidth();
 		
-		double[][] energymat = Calculate_Energy(originalimage, energytype,transpose); //TODO: in case of transpose calc energy of horizontal mat
+		double[][] energymat = Calculate_Energy(originalimage, energytype); 
 		
 		//calculate pixel attribute
 		double[][] atrib = CalcPixelAttribute(energymat);
@@ -219,14 +218,17 @@ public class ImageUtils {
 	/*
 	 * removes a straight seam from the image for the 'straight_seam' implementation
 	 * */
-	public static BufferedImage Remove_straight_seam(BufferedImage originalimage,int[][] energymat, int colToReduce){
+	public static BufferedImage Remove_straight_seam(BufferedImage originalimage,int energytype, int colToReduce){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
+		
+		double[][] energymat = Calculate_Energy(originalimage, energytype);
+		
 		int minIntVal = Integer.MAX_VALUE + 1;
 		for(int i = 0; i<colToReduce;i++){
-			int min = energymat[n-1][0];
+			double min = energymat[n-1][0];
 			for(int j =1; j<m;j++){
-				int temp = energymat[n-1][j];
+				double temp = energymat[n-1][j];
 				if(temp > minIntVal && temp<min){
 					for(int r = 0; r<n; r++){
 						energymat[r][j] = minIntVal;
@@ -454,7 +456,6 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,double[]
 		int m = img.getHeight();
 		int n = img.getWidth();
 		BufferedImage retimg = new BufferedImage(m, n, img.getType());
-		int temp;
 		for (int i = 0; i < m; i++) {
 			for (int j = 0; j < n; j++) {
 				retimg.setRGB(i, j, img.getRGB(j, i));
