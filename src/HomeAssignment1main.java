@@ -4,7 +4,7 @@ import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.math.*;
+
 
 
 
@@ -22,7 +22,7 @@ public class HomeAssignment1main {
 			System.exit(0); //TODO: check if o.k to exit like this	
 		}
 		
-		int originalnumofrows = 0;
+		int originalnumofrows=0;
 		int originalnumofcolumns=0;
 		
 		//Full path to the input image
@@ -46,11 +46,7 @@ public class HomeAssignment1main {
 			originalnumofrows =  inputimagebuffer.getHeight();
 			originalnumofcolumns =  inputimagebuffer.getWidth();
 			
-			/* TODO: changed accoarding to forum - maybe return this
-			//compute energy of image
-			int[][] energymatrix  = ImageUtils.Calculate_Energy(inputimagebuffer, energytype);*/
 			int[][] energymatrix = new int[5][5]; //TODO: remove this. only for dor's function
-			
 			
 			//check how much to resize vertically
 			int resizenumber = originalnumofcolumns - outputnumcolumns;
