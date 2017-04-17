@@ -325,41 +325,44 @@ public class ImageUtils {
 	/*
 	 * this function calculates min seam for straight seam curving function
 	 * */
-	public static double[][] calculate_Min_Seam(double [][] energy, int colToadd){
-		double[][] minSeam = calculate_Pixel_Attribute(energy);
+
+	public static int[][] calculate_Min_Seam(double [][] energy, int colToadd){
+		double[][] attribute = calculate_Pixel_Attribute(energy);
 		int m = energy[0].length;
 		int n = energy.length;
-
+		int[][] minSeam = new int[n][m];
 		double mindubVal = Double.MIN_VALUE;
 		for(int i = 0; i<colToadd;i++){
-			double min = minSeam[n-1][0];
+			double min = attribute[n-1][0];
 			int minindex = 0;
 			for(int j =1; j<m;j++){
-				double temp = minSeam[n-1][j];
+				double temp = attribute[n-1][j];
 				if(temp > mindubVal && temp<min){
 					minindex = j;
 					min = temp;
 				}
 			}
-			minSeam[n-1][minindex] =mindubVal;
+			attribute[n-1][minindex] =mindubVal;
+
+			minSeam[n-1][minindex]++;
 			for(int r = n-1; r>0;r--){
 				if(minindex == 0){
-					if(minSeam[r-1][minindex]> minSeam[r-1][minindex+1])
+					if(attribute[r-1][minindex]> attribute[r-1][minindex+1])
 						minindex = minindex+1;
 				}
 				else if(minindex == n-1){
-					if(minSeam[r-1][minindex]> minSeam[r-1][minindex-1])
+					if(attribute[r-1][minindex]> attribute[r-1][minindex-1])
 						minindex = minindex-1;
 				}
 				else{
-					min = Math.min(minSeam[r-1][minindex-1], minSeam[r-1][minindex]);
-					min = Math.min(minSeam[r-1][minindex+1], min);
-					if(min == minSeam[r-1][minindex-1])
+					min = Math.min(attribute[r-1][minindex-1], attribute[r-1][minindex]);
+					min = Math.min(attribute[r-1][minindex+1], min);
+					if(min == attribute[r-1][minindex-1])
 						minindex = minindex-1;
-					else if(min == minSeam[r-1][minindex+1])
+					else if(min == attribute[r-1][minindex+1])
 							minindex = minindex+1;
 				}
-				minSeam[r-1][minindex] =mindubVal;
+				minSeam[r-1][minindex]++;
 			}
 		}
         return minSeam;
@@ -386,11 +389,10 @@ public class ImageUtils {
 	public static BufferedImage add_single_seam_with_cuver(BufferedImage originalimage,int energytype, int colToadd){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
-		double mindubVal = Double.MIN_VALUE;
 		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
 		//calculate min sim attribute
-		double[][] seam = calculate_Min_Seam(energymat, colToadd);
+		int[][] seam = calculate_Min_Seam(energymat, colToadd);
 
 
 		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
@@ -398,14 +400,16 @@ public class ImageUtils {
 	        int c =0;
             for(int j=0; j<m; j++){
 				newImage.setRGB(c,i,originalimage.getRGB(j,i));
-            	if(seam[i][j] == mindubVal){
-					c++;
-					double rgbval = originalimage.getRGB(j,i);
-					if(j != m-1){		
-						rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(j+1,1);
-					}
-            		newImage.setRGB(c,i,(int)rgbval); //TODO: check this is working
-					
+            	if(seam[i][j] > 0){
+            		double rgbval = originalimage.getRGB(j,i);
+            		
+	            	for(int k = 0; k<seam[i][j]; k++){
+						c++;
+						if(j != m-1){		
+							rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(j+1,i);
+						}
+	            		newImage.setRGB(c,i,(int)rgbval); //TODO: check this is working
+            		}
             	}
                 c++;
             }
@@ -436,7 +440,7 @@ public class ImageUtils {
             		minSeam[i][j] += Math.min(energy[i-1][j]+cu,energy[i-1][j-1]+cl);
             	}
             	else
-            		minSeam[i][j] += Math.min(energy[i-1][j]+cu,Math.min(energy[i-1][j-1]+cl,energy[i-1][j+1])+cr);
+            		minSeam[i][j] += Math.min(energy[i-1][j]+cu,Math.min(energy[i-1][j-1]+cl,energy[i-1][j+1]+cr));
             }
         return minSeam;
 		
@@ -445,11 +449,10 @@ public class ImageUtils {
 public static BufferedImage add_single_seam(BufferedImage originalimage,int energytype, int colToadd){
 	int m = originalimage.getWidth();
 	int n = originalimage.getHeight();
-	double mindubVal = Double.MIN_VALUE;
 	double[][] energymat = calculate_Energy(originalimage, energytype); 
 	
 	//calculate min sim attribute
-	double[][] seam = calculate_Min_Seam(energymat, colToadd);
+	int[][] seam = calculate_Min_Seam(energymat, colToadd);
 
 
 	BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
@@ -457,10 +460,12 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,int ener
         int c =0;
         for(int j=0; j<m; j++){
 			newImage.setRGB(c,i,originalimage.getRGB(j,i));
-        	if(seam[i][j] == mindubVal){
-				c++;
-        		newImage.setRGB(c,i,originalimage.getRGB(j,i)); //TODO: check this is working
-				
+			if(seam[i][j] > 0){
+				int rgbval = originalimage.getRGB(j,i);
+            	for(int k = 0; k<seam[i][j]; k++){
+					c++;
+            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
+        		}
         	}
             c++;
         }
@@ -483,7 +488,134 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,int ener
 		return retimg;
 	}
 	
+	/*
+	 * removes a general seam as described in the Assignment
+	 * */
+	public static BufferedImage remove_General_seam_Energy_Once(BufferedImage originalimage,int energytype,int resizeNum){
+		
+		
+		double[][] energymat = calculate_Energy(originalimage, energytype); 
+		
+		//calculate pixel attribute
+		double[][] atrib = calculate_Pixel_Attribute(energymat);
+		print_Mat_To_Logfile(atrib, "atributefirst");
+		
+		for(;resizeNum>0;resizeNum--){
+			
+			//calculate minimal seam path - vector representing indexes
+			atrib = calculate_General_Seam_static(atrib);
+			
+			//create new image with one less column (width-1)
+			originalimage = calculate_new_image(originalimage,atrib);
+			
+			atrib = calculate_new_atribute(atrib);
+			
+		}
+		
+		//return new image
+		return originalimage;
+	}
 	
+	/*
+	 * this function calculates the minimal seam to remove and returns it as a vector
+	 * */
+	private static double[][] calculate_General_Seam_static(double[][] atrib){
+		
+		int rows = atrib.length; //m=rows
+		int cols = atrib[0].length;
+		double min = Integer.MAX_VALUE;
+		int minIndex=0;
+		int[] seam = new int[rows];
+		//find first min val
+		for (int j = 0; j < cols; j++) {
+			if(atrib[rows-1][j]<min){
+				min = atrib[rows-1][j];
+				minIndex = j;
+			}
+		}
+		atrib[rows-1][minIndex] = Integer.MAX_VALUE; 
+		print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+		seam[0] = minIndex;
+		double tmpleft = Integer.MAX_VALUE;
+		double tmpmid = Integer.MAX_VALUE;
+		double tmpright = Integer.MAX_VALUE;
+		for (int i = 1; i < seam.length; i++){
+			if(seam[i-1]!=0){
+				tmpleft = atrib[rows-1-i][seam[i-1]-1];
+			}
+			if(seam[i-1]!=cols-1){
+				tmpright = atrib[rows-1-i][seam[i-1]+1];
+			}
+			tmpmid = atrib[rows-1-i][seam[i-1]];
+			min = Math.min(tmpleft, Math.min(tmpright, tmpmid));
+			if(min == tmpmid){
+				seam[i] = seam[i-1];
+				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; //TODO: remove these three
+			}
+			else if(min == tmpleft){
+				seam[i] = seam[i-1]-1;
+				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; //TODO: remove these three
+			}
+			else{
+				seam[i] = seam[i-1]+1;
+				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; //TODO: remove these three
+			}
+			print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+			//reset tmp values
+			tmpleft = Integer.MAX_VALUE;
+			tmpmid = Integer.MAX_VALUE;
+			tmpright = Integer.MAX_VALUE;
+		}
+		return atrib;
+	}
+	
+	private static double[][] calculate_new_atribute(double[][] atrib){
+		
+		double[][] atribnew = new double[atrib.length][atrib[0].length-1];
+		
+		int k=0; //i of new atrib
+		int l=0; //j of new atrib
+		
+		//copy only wanted pixels to new picture
+		for (int i = 0; i < atrib.length; i++) {
+			for (int j = 0; j < atrib[0].length; j++) {
+				if(atrib[i][j] == Integer.MAX_VALUE){
+					continue;
+				}
+				atribnew[k][l] = atrib[i][j];
+				l++;
+			}
+			l=0;
+			k++;
+		}
+		return atribnew;
+	}
+	
+	private static BufferedImage calculate_new_image(BufferedImage img,double[][] atrib){
+		
+		int rows = img.getHeight();
+		int cols = img.getWidth();
+			
+		//create new image with one less column (width-1)
+		BufferedImage newImage = new BufferedImage(img.getWidth()-1, img.getHeight(), img.getType());
+		
+		int k=0; //i of new mat
+		int l=0; //j of new mat
+		
+		//copy only wanted pixels to new picture
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				if(atrib[i][j] == Integer.MAX_VALUE){
+					continue;
+				}
+				newImage.setRGB(l, k, img.getRGB(j, i));
+				l++;
+			}
+			l=0;
+			k++;
+		}
+		return newImage;
+	}
 }
 
 
