@@ -335,7 +335,13 @@ public class ImageUtils {
 		for(int i = 0; i<colToadd;i++){
 			double min = attribute[n-1][0];
 			int minindex = 0;
-			for(int j =1; j<m;j++){
+			while(minindex<m && attribute[n-1][minindex] == mindubVal){
+				minindex++;
+			}
+			if(minindex==m)
+				minindex--;
+			min = attribute[n-1][minindex];
+			for(int j =minindex+1; j<m;j++){
 				double temp = attribute[n-1][j];
 				if(temp > mindubVal && temp<min){
 					minindex = j;
@@ -350,17 +356,17 @@ public class ImageUtils {
 					if(attribute[r-1][minindex]> attribute[r-1][minindex+1])
 						minindex = minindex+1;
 				}
-				else if(minindex == n-1){
+				else if(minindex == m-1){
 					if(attribute[r-1][minindex]> attribute[r-1][minindex-1])
 						minindex = minindex-1;
 				}
 				else{
 					min = Math.min(attribute[r-1][minindex-1], attribute[r-1][minindex]);
 					min = Math.min(attribute[r-1][minindex+1], min);
-					if(min == attribute[r-1][minindex-1])
-						minindex = minindex-1;
-					else if(min == attribute[r-1][minindex+1])
-							minindex = minindex+1;
+					if(min == attribute[r-1][minindex+1])
+						minindex = minindex+1;
+					else if(min == attribute[r-1][minindex-1])
+							minindex = minindex-1;
 				}
 				minSeam[r-1][minindex]++;
 			}
