@@ -401,14 +401,14 @@ public class ImageUtils {
             for(int j=0; j<m; j++){
 				newImage.setRGB(c,i,originalimage.getRGB(j,i));
             	if(seam[i][j] > 0){
-            		double rgbval = originalimage.getRGB(j,i);
+            		int rgbval = originalimage.getRGB(j,i);
             		
 	            	for(int k = 0; k<seam[i][j]; k++){
 						c++;
 						if(j != m-1){		
-							rgbval = 0.5*rgbval + 0.5*originalimage.getRGB(j+1,i);
+							rgbval = avg_color(rgbval, originalimage.getRGB(j+1,i));
 						}
-	            		newImage.setRGB(c,i,(int)rgbval); //TODO: check this is working
+	            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
             		}
             	}
                 c++;
@@ -418,7 +418,8 @@ public class ImageUtils {
 	}
 	
 
-	public static double[][] calcuateMinForwardSeam(BufferedImage image,double [][] energy){
+	public static double[][] calcuateMinForwardSeam(BufferedImage image,int energytype){
+		double[][] energy = calculate_Energy(image, energytype); 
 	    int[][] rgbmat = rgbMatrix(image);
 		double[][] minSeam = new double[energy[0].length][energy.length];
 		for (int i = 1; i < energy.length; i++)//go through every row
@@ -515,7 +516,15 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,int ener
 		//return new image
 		return originalimage;
 	}
-	
+	private static int avg_color(int x, int y){
+		Color cx = new Color(x);
+		Color cy = new Color(y);
+        int red = (int)((cx.getRed()+cy.getRed())/2);
+        int green = (int)((cx.getGreen() + cx.getGreen())/2);
+        int blue = (int)((cy.getBlue() + cy.getBlue())/2);
+        Color c = new Color(red, green, blue);
+        return c.getRGB();
+	}
 	/*
 	 * this function calculates the minimal seam to remove and returns it as a vector
 	 * */
