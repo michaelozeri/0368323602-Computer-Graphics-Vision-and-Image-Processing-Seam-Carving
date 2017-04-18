@@ -297,11 +297,11 @@ public class ImageUtils {
 		double[][] pmnMat = new double[m][n];
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
-				int temppmn = 0;
+				double temppmn = 0;
 				for(int k = Math.max(i-4, 0); k<Math.min(i+5, m);k++){
 					for(int l = Math.max(j-4, 0); l<Math.min(j+5, n);l++){
 						if(i != k || l!=j){
-							temppmn += calculate_Distance(rgbmat[i][j], rgbmat[k][l]);	
+							temppmn += greyscaleMat[k][l];	
 						}
 					}
 				}
