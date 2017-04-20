@@ -13,9 +13,8 @@ public class HomeAssignment1main {
 	public static void main(String[] args){
 		
 		long starttime = System.nanoTime(); //TODO: remove this
-		//for submission types TODO: maybe remove this?
-		boolean straight_seam = true;
-		int tmpcntforresize=0;
+		
+		boolean straight_seam = true; //for submission types TODO: maybe remove this?
 		
 		if(args.length != 5){
 			System.out.println("ERROR: not enough arguments inserted");
@@ -39,8 +38,8 @@ public class HomeAssignment1main {
 		program will write the output image to)*/
 		String outputimagepath = args[4];
 		
-		//opening the photo and storing it into bufferedimage
 		try{
+			//opening the photo and storing it into buffered image
 			File inputimagefile = new File(inputimagepath);
 			BufferedImage inputimagebuffer = ImageIO.read(inputimagefile);
 			originalnumofrows =  inputimagebuffer.getHeight();
@@ -58,7 +57,6 @@ public class HomeAssignment1main {
 				}else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
-						//System.out.println("finished removing vertical seam");
 					}
 				}
 			}
@@ -83,7 +81,6 @@ public class HomeAssignment1main {
 				}else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
-						//System.out.println("finished removing hotrizontal seam");
 					}
 				}
 			}
@@ -94,11 +91,11 @@ public class HomeAssignment1main {
 
 			}
 			
-			
+			//transpose image back
 			inputimagebuffer = ImageUtils.transpose_Image(inputimagebuffer);
 			
 			File outputimagefile = new File(outputimagepath);
-			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); //TODO: check return value
+			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); 
 			
 			long finishtime = System.nanoTime() - starttime; //TODO: remove this
 

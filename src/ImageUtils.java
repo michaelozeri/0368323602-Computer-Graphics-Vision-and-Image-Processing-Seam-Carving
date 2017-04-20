@@ -10,8 +10,9 @@ public class ImageUtils {
 	// a boolean deciding if to log or not
 	public static boolean m_log = false;
 	
-	/*
-	 * prints the mat into a log file for debug purposes
+	/**
+	 * prints the matrix into a log file for debug purposes
+	 * @author michael
 	 * */
 	private static void print_Mat_To_Logfile(double[][] mat,String filename){ 
 		if(m_log){
@@ -42,10 +43,10 @@ public class ImageUtils {
 		}
 	}
 	
-	/*
+	/**
 	 * this function calculates the energy matrix for the image given as 'image'
 	 * @param energytype - means how to calculate the energy (with / without local entropy
-	 * @return 'energymatrix' - the energy matrix of the image given
+	 * @return energymatrix - the energy matrix of the image given
 	 * */
 	public static double[][] calculate_Energy(BufferedImage image,int energytype){ 
 		
@@ -72,15 +73,16 @@ public class ImageUtils {
 			}
 		}
 		
-		if(energytype>=1){ 
-			calculate_Hi(energymatrix,rgbmat, n, m);
+		if(energytype==1){ 
+			calculate_Hi(energymatrix,rgbmat);
 		}
 		
 		return energymatrix;
 	}
 	
-	/*
+	/**
 	 * gets an image and evaluates the RGB matrix
+	 * @return an int[][] matrix representing the image
 	 * */
 	private static int[][] rgbMatrix(BufferedImage image){
 		int m = image.getHeight();
@@ -94,8 +96,10 @@ public class ImageUtils {
 		return rgbmat;
 	}
 	
-	/*
+	/**
 	 * removes a general seam as described in the Assignment
+	 * this function removes one vertical seam from the image
+	 * @return newImage - the image with the seam removed
 	 * */
 	public static BufferedImage remove_General_seam(BufferedImage originalimage,int energytype){
 		
@@ -129,13 +133,14 @@ public class ImageUtils {
 			l=0;
 			k++;
 		}
-		
-		//return new image
 		return newImage;
 	}
 	
-	/*
+	/**
 	 * calculates the pixel attribute before calculating seam path
+	 * @param energymatrix - the matrix on whom to calculate the pixel attribute before calculating the minimal
+	 * seam
+	 * @return atrib - the matrix energymatrix after the pixel attribute calculation
 	 * */
 	private static double[][] calculate_Pixel_Attribute(double[][] energymatrix){
 		
@@ -255,25 +260,28 @@ public class ImageUtils {
 		return newImage;
 	}
 	
-	/*
+	/**
 	 * this function calculates the straight seam to be removed by summing
 	 * each column to a double value
+	 * @return straightsSeam - a double array which each index represents the column energy
 	 * */
-	public static double[] calcuate_Straight_Seam(double [][] energy){
+	public static double[] calcuate_Straight_Seam(double [][] energymatrix){
 		//value per each column
-		double[] straightsSeam = new double[energy[0].length];
-		for (int i = 0; i < energy.length; i++)//go through every row
-            for (int j = 0; j < energy[0].length; j++)//add the value of energy above
-            	straightsSeam[j] += energy[i][j];
+		double[] straightsSeam = new double[energymatrix[0].length];
+		for (int i = 0; i < energymatrix.length; i++)//go through every row
+            for (int j = 0; j < energymatrix[0].length; j++)//add the value of energy above
+            	straightsSeam[j] += energymatrix[i][j];
         return straightsSeam;
 	}
 
-	/*
+	/**
 	 * this function is called in case we want to add the local entropy to the energy function
 	 * @return the energy matrix with local entropy
 	 * */
-	private static void calculate_Hi(double[][] matrix,int[][] rgbmat,int n,int m){
-		double[][] pmnMat = calculate_pmn(rgbmat,n, m);
+	private static void calculate_Hi(double[][] matrix,int[][] rgbmat){
+		int m = matrix.length;
+		int n = matrix[0].length;
+		double[][] pmnMat = calculate_pmn(rgbmat);
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
 				double hi = 0;
@@ -289,11 +297,15 @@ public class ImageUtils {
 		}	
 	}
 	
-	/*
-	 * gets an RGB matrix and evaluates the pmn for each pixel
+	/**
+	 * gets an RGB matrix and evaluates the p(m,n) value for each pixel
+	 * @param rgbmat - the matrix from to evaluate the pmn value
+	 * @return pmnMat - the matrix with the P(m,n) values already in it
 	 * */
-	private static double[][] calculate_pmn(int[][] rgbmat,int n,int m){
-		int[][] greyscaleMat = grayScale(rgbmat,n, m);
+	private static double[][] calculate_pmn(int[][] rgbmat){
+		int m = rgbmat.length;
+		int n = rgbmat[0].length;
+		double[][] greyscaleMat = grayScale(rgbmat);
 		double[][] pmnMat = new double[m][n];
 		for(int i=0;i<m;i++){
 			for(int j=0;j<n;j++){
@@ -311,7 +323,7 @@ public class ImageUtils {
 		return pmnMat;
 	}
 	
-	/*
+	/**
 	 * this function calculates the distance between two RGB points (which are int's)
 	 * as described in the Assignment
 	 * @return int - the distance between the two points
@@ -322,10 +334,10 @@ public class ImageUtils {
 		return (Math.abs(one.getRed()-two.getRed())+Math.abs(one.getBlue()-two.getBlue())+Math.abs(one.getGreen()-two.getGreen()))/3;
 	}
 		
-	/*
-	 * this function calculates min seam for straight seam curving function
+	/**
+	 * this function calculates the minimal seam for straight seam curving function
+	 * @param energy - the energy matrix to calculate from it the minimal seam
 	 * */
-
 	public static int[][] calculate_Min_Seam(double [][] energy, int colToadd){
 		double[][] attribute = calculate_Pixel_Attribute(energy);
 		int m = energy[0].length;
@@ -375,11 +387,15 @@ public class ImageUtils {
 		
 	}
 	
-	/*
+	/**
 	 * this function gets an RGB image and evaluates the grey scale matrix
+	 * @param rgbmat - the matrix representing the image which to calculate the gray scale values from
+	 * @return greyscaleMat - a matrix representing the gray scale value of the color matrix image
 	 * */
-	private static int[][] grayScale(int[][] rgbmat,int n, int m) {
-		int[][] greyscaleMat = new int[m][n];
+	private static double[][] grayScale(int[][] rgbmat) {
+		int m = rgbmat.length;
+		int n = rgbmat[0].length;
+		double[][] greyscaleMat = new double[m][n];
 		for(int i=0; i<m; i++){
 	    	for(int j=0; j<n; j++){
 	    		Color c = new Color(rgbmat[i][j]);
@@ -453,36 +469,37 @@ public class ImageUtils {
 		
 	}
 
-public static BufferedImage add_single_seam(BufferedImage originalimage,int energytype, int colToadd){
-	int m = originalimage.getWidth();
-	int n = originalimage.getHeight();
-	double[][] energymat = calculate_Energy(originalimage, energytype); 
+	public static BufferedImage add_single_seam(BufferedImage originalimage,int energytype, int colToadd){
+		int m = originalimage.getWidth();
+		int n = originalimage.getHeight();
+		double[][] energymat = calculate_Energy(originalimage, energytype); 
+		
+		//calculate min sim attribute
+		int[][] seam = calculate_Min_Seam(energymat, colToadd);
 	
-	//calculate min sim attribute
-	int[][] seam = calculate_Min_Seam(energymat, colToadd);
+		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
+		for(int i=0; i<n; i++){
+	        int c =0;
+	        for(int j=0; j<m; j++){
+				newImage.setRGB(c,i,originalimage.getRGB(j,i));
+				if(seam[i][j] > 0){
+					int rgbval = originalimage.getRGB(j,i);
+	            	for(int k = 0; k<seam[i][j]; k++){
+						c++;
+	            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
+	        		}
+	        	}
+	            c++;
+	        }
+	     }
+		return newImage;
+	}
 
-
-	BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
-	for(int i=0; i<n; i++){
-        int c =0;
-        for(int j=0; j<m; j++){
-			newImage.setRGB(c,i,originalimage.getRGB(j,i));
-			if(seam[i][j] > 0){
-				int rgbval = originalimage.getRGB(j,i);
-            	for(int k = 0; k<seam[i][j]; k++){
-					c++;
-            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
-        		}
-        	}
-            c++;
-        }
-     }
-	return newImage;
-}
-
-/*
- * transpose's the image
- * */
+	/**
+	 * transpose's the image
+	 * @param img - the image to transpose
+	 * @return retimg - the image transposed
+	 * */
 	public static BufferedImage transpose_Image(BufferedImage img){
 		int m = img.getHeight();
 		int n = img.getWidth();
@@ -522,6 +539,14 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,int ener
 		//return new image
 		return originalimage;
 	}
+	
+	/**
+	 * calculate's the avrage color between two colors given
+	 * @param x - an int representing a RGB color by its bit's
+	 * @param y - an int representing a RGB color by its bit's
+	 * @return the avrage color represented by an int
+	 * @author - dor
+	 */
 	private static int avg_color(int x, int y){
 		Color cx = new Color(x);
 		Color cy = new Color(y);
@@ -531,6 +556,7 @@ public static BufferedImage add_single_seam(BufferedImage originalimage,int ener
         Color c = new Color(red, green, blue);
         return c.getRGB();
 	}
+	
 	/*
 	 * this function calculates the minimal seam to remove and returns it as a vector
 	 * */
