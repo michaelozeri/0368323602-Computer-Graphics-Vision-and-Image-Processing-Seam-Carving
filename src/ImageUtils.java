@@ -12,7 +12,6 @@ public class ImageUtils {
 	
 	/**
 	 * prints the matrix into a log file for debug purposes
-	 * @author michael
 	 * */
 	private static void print_Mat_To_Logfile(double[][] mat,String filename){ 
 		if(m_log){
@@ -107,13 +106,18 @@ public class ImageUtils {
 		int cols = originalimage.getWidth();
 		
 		double[][] energymat = calculate_Energy(originalimage, energytype); 
+		double[][] dynamicEnergyMat;
 		
-		//calculate pixel attribute
-		double[][] atrib = calculate_Pixel_Attribute(energymat);
-		print_Mat_To_Logfile(atrib, "atributefirst");
+		if(energytype < 2){
+			//calculate pixel attribute
+			dynamicEnergyMat = calculate_Pixel_Attribute(energymat);
+			print_Mat_To_Logfile(dynamicEnergyMat, "atributefirst");
+		}else{
+			dynamicEnergyMat = calculate_Forward_Attribute(originalimage, energytype, energymat);
+		}
 		
 		//calculate minimal seam path - vector representing indexes
-		int[] seam = calculate_General_Seam(atrib);
+		int[] seam = calculate_General_Seam(dynamicEnergyMat);
 		
 		//create new image with one less column (width-1)
 		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
@@ -143,7 +147,6 @@ public class ImageUtils {
 	 * @return atrib - the matrix energymatrix after the pixel attribute calculation
 	 * */
 	private static double[][] calculate_Pixel_Attribute(double[][] energymatrix){
-		
 		int m = energymatrix.length; //m=rows
 		int n = energymatrix[0].length;
 		double tmpleft = Integer.MAX_VALUE;
@@ -239,7 +242,7 @@ public class ImageUtils {
 			double[][] energymat = calculate_Energy(originalimage, energytype);
 	
 			//calculate a vector that each index holds the column seam value
-			double[] seamVector = calcuate_Straight_Seam(energymat);
+			double[] seamVector = calculate_Straight_Seam(energymat);
 			
 			//choose the minimum seam to remove from the seam vector
 			double maxdub = Double.MAX_VALUE;
@@ -275,7 +278,7 @@ public class ImageUtils {
 	 * each column to a double value
 	 * @return straightsSeam - a double array which each index represents the column energy
 	 * */
-	public static double[] calcuate_Straight_Seam(double [][] energymatrix){
+	public static double[] calculate_Straight_Seam(double [][] energymatrix){
 		//value per each column
 		double[] straightsSeam = new double[energymatrix[0].length];
 		for (int i = 0; i < energymatrix.length; i++)//go through every row
@@ -348,8 +351,13 @@ public class ImageUtils {
 	 * this function calculates the minimal seam for straight seam curving function
 	 * @param energy - the energy matrix to calculate from it the minimal seam
 	 * */
-	public static int[][] calculate_Min_Seam(double [][] energy, int colToadd){
-		double[][] attribute = calculate_Pixel_Attribute(energy);
+	public static int[][] calculate_Min_Seam(double [][] energy, int colToadd,int energytype,BufferedImage originalImage){
+		double[][] attribute;
+		if(energytype < 2){
+			attribute = calculate_Pixel_Attribute(energy);
+		}else{
+			attribute = calculate_Forward_Attribute(originalImage, energytype, energy);
+		}
 		int m = energy[0].length;
 		int n = energy.length;
 		int[][] minSeam = new int[n][m];
@@ -369,7 +377,7 @@ public class ImageUtils {
 				}
 			}
 			attribute[n-1][minindex] =maxdubVal;
-			energy[n-1][minindex] +=maxdubVal;
+			//energy[n-1][minindex] +=10000; //TODO: kralnara vs moreach
 			minSeam[n-1][minindex]++;
 			for(int r = n-1; r>0;r--){
 				if(minindex == 0){
@@ -389,9 +397,13 @@ public class ImageUtils {
 							minindex = minindex-1;
 				}
 				minSeam[r-1][minindex]++;
-				energy[r-1][minindex] += maxdubVal;
+				energy[r-1][minindex] += maxdubVal+1000;
 			}
-			attribute = calculate_Pixel_Attribute(energy);
+			if(energytype < 2){
+				attribute = calculate_Pixel_Attribute(energy);
+			}else{
+				attribute = calculate_Forward_Attribute(originalImage, energytype, energy);
+			}
 		}
         return minSeam;
 		
@@ -432,7 +444,7 @@ public class ImageUtils {
 		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
 		//calculate min sim attribute
-		int[][] seam = calculate_Min_Seam(energymat, colToadd);
+		int[][] seam = calculate_Min_Seam(energymat, colToadd, energytype, originalimage);
 
 		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
 		
@@ -458,39 +470,36 @@ public class ImageUtils {
 	}
 	
 	/**
-	 * 
-	 * @author dor
+	 * this function calculates the forward energy before calculating the seam. 
 	 * @param image - the image to calculate on it the forward energy
 	 * @param energytype - the energy type asked in the exercise
 	 * @return minSeam - the minimal seam to remove from the picture calculated by the forwarding method
 	 */
-	public static double[][] calcuateMinForwardSeam(BufferedImage image,int energytype){
-		double[][] energy = calculate_Energy(image, energytype); 
+	public static double[][] calculate_Forward_Attribute(BufferedImage image,int energytype,double[][] energy){
+		//double[][] energy = calculate_Energy(image, energytype); 
 	    int[][] rgbmat = rgbMatrix(image);
-		double[][] minSeam = new double[energy[0].length][energy.length];
-		for (int i = 1; i < energy.length; i++)//go through every row
+		double[][] minSeam = new double[energy.length][energy[0].length];
+		for (int i = 1 ; i < energy.length; i++)//go through every row
             for (int j = 0; j < energy[0].length; j++){//add the value of energy above
 			    double cl = 0;
 				double cr = 0;
 				double cu = 0;
-				if((i!= 0) && (j!= 0 || j!=energy[0].length-1)){
-					cl = Math.abs(rgbmat[i][j-1]- rgbmat[i][j+1]) + Math.abs(rgbmat[i-1][j] - rgbmat[i][j-1]);
-					cr = Math.abs(rgbmat[i][j-1]- rgbmat[i][j+1]) + Math.abs(rgbmat[i-1][j] - rgbmat[i][j+1]);
-				}
-				if((j!= 0 || j!=energy[0].length-1)){
-					cu = Math.abs(rgbmat[i][j-1]- rgbmat[i][j+1]);
+				if((j!= 0 && j!=(energy[0].length-1))){//i will never be 0
+					cl = calculate_Distance(rgbmat[i][j-1],rgbmat[i][j+1]) + calculate_Distance(rgbmat[i-1][j],rgbmat[i][j-1]);
+					cr = calculate_Distance(rgbmat[i][j-1],rgbmat[i][j+1]) + calculate_Distance(rgbmat[i-1][j],rgbmat[i][j+1]);
+					cu = calculate_Distance(rgbmat[i][j-1],rgbmat[i][j+1]);
 				}
             	if(j==0){
             		minSeam[i][j] += Math.min(energy[i-1][j]+cu,energy[i-1][j+1]+cr);
             	}
-            	else if(j==energy[0].length-1){
+            	else if(j==(energy[0].length-1)){
             		minSeam[i][j] += Math.min(energy[i-1][j]+cu,energy[i-1][j-1]+cl);
             	}
-            	else
+            	else{
             		minSeam[i][j] += Math.min(energy[i-1][j]+cu,Math.min(energy[i-1][j-1]+cl,energy[i-1][j+1]+cr));
+            	}
             }
         return minSeam;
-		
 	}
 
 	public static BufferedImage add_single_seam(BufferedImage originalimage,int energytype, int colToadd){
@@ -499,7 +508,7 @@ public class ImageUtils {
 		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
 		//calculate min sim attribute
-		int[][] seam = calculate_Min_Seam(energymat, colToadd);
+		int[][] seam = calculate_Min_Seam(energymat, colToadd, energytype, originalimage);
 	
 		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
 		for(int i=0; i<n; i++){
@@ -569,7 +578,6 @@ public class ImageUtils {
 	 * @param clr1 - an int representing a RGB color by its bit's
 	 * @param clr2 - an int representing a RGB color by its bit's
 	 * @return the avrage color represented by an int
-	 * @author - dor
 	 */
 	private static int calculate_avrage_color(int clr1, int clr2){
 		Color cx = new Color(clr1);

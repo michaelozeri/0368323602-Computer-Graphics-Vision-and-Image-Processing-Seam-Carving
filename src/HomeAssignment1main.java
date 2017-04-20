@@ -14,7 +14,8 @@ public class HomeAssignment1main {
 		
 		long starttime = System.nanoTime(); //TODO: remove this
 		
-		boolean straight_seam = true; //for submission types TODO: maybe remove this?
+		boolean straight_seam = false; //for submission types TODO: maybe remove this?
+		boolean add_interpolation = true;
 		
 		if(args.length != 5){
 			System.out.println("ERROR: not enough arguments inserted");
@@ -31,8 +32,7 @@ public class HomeAssignment1main {
 		//Number of rows of the resized output image
 		int outputnumrows = Integer.parseInt(args[2]);
 		/*An argument with three possible values, where '0' = regular
-		energy without entropy term, '1' = regular energy with entropy term and '2' =
-		forward energy*/
+		energy without entropy term, '1' = regular energy with entropy term and '2' = forward energy*/
 		int energytype = Integer.parseInt(args[3]);
 		/*Full path to the output image (where your
 		program will write the output image to)*/
@@ -61,9 +61,11 @@ public class HomeAssignment1main {
 			}
 			// need to add vertical seams's
 			else if(resizenumber < 0){ 
-				inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
-				//inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
-
+				if(add_interpolation){
+					inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
+				}else{
+					inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
+				}
 			}
 			
 			inputimagebuffer = ImageUtils.transpose_Image(inputimagebuffer);
@@ -84,9 +86,11 @@ public class HomeAssignment1main {
 			}
 			// need to add vertical seams's
 			else if(resizenumber < 0){ 
-				inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
-				//inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
-
+				if(add_interpolation){
+					inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
+				}else{
+					inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
+				}
 			}
 			
 			//transpose image back
