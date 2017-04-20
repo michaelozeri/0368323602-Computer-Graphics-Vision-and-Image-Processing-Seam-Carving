@@ -51,10 +51,9 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
-					}
-				}else{
+					inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype,resizenumber);
+				}
+				else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
 					}
@@ -75,10 +74,9 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					for(;resizenumber>0;resizenumber--){
-						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
-					}
-				}else{
+					inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype,resizenumber);
+				}
+				else{
 					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer =  ImageUtils.remove_General_seam(inputimagebuffer, energytype);
 					}

@@ -220,44 +220,54 @@ public class ImageUtils {
 		return seam;
 	}
 	
-	/*
+	/**
 	 * removes a straight seam from the image for the 'straight_seam' implementation
+	 * need's to calculate energy only once
 	 * */
-	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype){
+	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype, int colsToRemove){
 		
 		int m = originalimage.getWidth();
-		int n = originalimage.getHeight();
-		
+				
 		//calculate the energy matrix
 		double[][] energymat = calculate_Energy(originalimage, energytype);
 
 		//calculate a vector that each index holds the column seam value
 		double[] seamVector = calcuate_Straight_Seam(energymat);
 		
-		//choose the minimum seam to remove from the seam vector
-		int minindex = 0;
-		double min = seamVector[0];
-		for(int j =1; j<m;j++){
-			double temp = seamVector[j];
-			if(temp<min){
-				minindex = j;
-				min = seamVector[j];
+		int minindex;
+		
+		for (int i = 0; i < colsToRemove; i++) {
+			
+			//choose the minimum seam to remove from the seam vector
+			minindex = 0;			
+			double min = seamVector[0];
+			for(int j =1; j<m;j++){
+				double temp = seamVector[j];
+				if(temp<min){
+					minindex = j;
+					min = seamVector[j];
+				}
 			}
+			
+			//set that seam as not minimal
+			seamVector[minindex] = Double.MAX_VALUE;
+			
+			//create a new image with one less column
+			BufferedImage tempImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
+			
+			for(int k=0; k<originalimage.getHeight(); k++){
+				int c = 0;
+	            for(int l=0; l<originalimage.getWidth(); l++){
+	            	if(l == minindex){
+	            		continue;
+	            	}
+	                tempImage.setRGB(c,k,originalimage.getRGB(l,k));
+	                c++;
+	            }
+	         }
+			originalimage = tempImage;
 		}
-		
-		BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
-		
-		for(int i=0; i<n; i++){
-			int c = 0;
-            for(int j=0; j<m; j++){
-            	if(j == minindex){
-            		continue;
-            	}
-                newImage.setRGB(c,i,originalimage.getRGB(j,i));
-                c++;
-            }
-         }
-		return newImage;
+		return originalimage;
 	}
 	
 	/**
