@@ -62,7 +62,7 @@ public class HomeAssignment1main {
 			}
 			// need to add vertical seams's
 			else if(resizenumber < 0){ 
-				inputimagebuffer = ImageUtils.add_single_seam_with_cuver(inputimagebuffer, energytype, -resizenumber);
+				inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
 				//inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
 
 			}
@@ -86,7 +86,7 @@ public class HomeAssignment1main {
 			}
 			// need to add vertical seams's
 			else if(resizenumber < 0){ 
-				inputimagebuffer = ImageUtils.add_single_seam_with_cuver(inputimagebuffer, energytype, -resizenumber);
+				inputimagebuffer = ImageUtils.add_single_seam_with_interpolation(inputimagebuffer, energytype, -resizenumber);
 				//inputimagebuffer = ImageUtils.add_single_seam(inputimagebuffer, energytype, -resizenumber);
 
 			}

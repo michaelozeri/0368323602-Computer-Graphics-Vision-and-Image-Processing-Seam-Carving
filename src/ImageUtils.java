@@ -408,16 +408,24 @@ public class ImageUtils {
 		return greyscaleMat; 
 	}
 	
-	public static BufferedImage add_single_seam_with_cuver(BufferedImage originalimage,int energytype, int colToadd){
+	/**
+	 * this function adds a single seam to the picture and Blends the added seam by interpolation with its neighbors
+	 * @param originalimage - the original image to add the seam to
+	 * @param energytype - the energy type of the picture
+	 * @param colToadd - number of cols to add
+	 * @return newImage - the new image with the added seam
+	 */
+	public static BufferedImage add_single_seam_with_interpolation(BufferedImage originalimage,int energytype, int colToadd){
 		int m = originalimage.getWidth();
 		int n = originalimage.getHeight();
+		
 		double[][] energymat = calculate_Energy(originalimage, energytype); 
 		
 		//calculate min sim attribute
 		int[][] seam = calculate_Min_Seam(energymat, colToadd);
 
-
 		BufferedImage newImage = new BufferedImage(m+colToadd, n, originalimage.getType());
+		
 		for(int i=0; i<n; i++){
 	        int c =0;
             for(int j=0; j<m; j++){
@@ -428,7 +436,7 @@ public class ImageUtils {
 	            	for(int k = 0; k<seam[i][j]; k++){
 						c++;
 						if(j != m-1){		
-							rgbval = avg_color(rgbval, originalimage.getRGB(j+1,i));
+							rgbval = calculate_avrage_color(rgbval, originalimage.getRGB(j+1,i));
 						}
 	            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
             		}
@@ -439,7 +447,13 @@ public class ImageUtils {
 		return newImage;
 	}
 	
-
+	/**
+	 * 
+	 * @author dor
+	 * @param image - the image to calculate on it the forward energy
+	 * @param energytype - the energy type asked in the exercise
+	 * @return minSeam - the minimal seam to remove from the picture calculated by the forwarding method
+	 */
 	public static double[][] calcuateMinForwardSeam(BufferedImage image,int energytype){
 		double[][] energy = calculate_Energy(image, energytype); 
 	    int[][] rgbmat = rgbMatrix(image);
@@ -542,14 +556,14 @@ public class ImageUtils {
 	
 	/**
 	 * calculate's the avrage color between two colors given
-	 * @param x - an int representing a RGB color by its bit's
-	 * @param y - an int representing a RGB color by its bit's
+	 * @param clr1 - an int representing a RGB color by its bit's
+	 * @param clr2 - an int representing a RGB color by its bit's
 	 * @return the avrage color represented by an int
 	 * @author - dor
 	 */
-	private static int avg_color(int x, int y){
-		Color cx = new Color(x);
-		Color cy = new Color(y);
+	private static int calculate_avrage_color(int clr1, int clr2){
+		Color cx = new Color(clr1);
+		Color cy = new Color(clr2);
         int red = (int)((cx.getRed()+cy.getRed())/2);
         int green = (int)((cx.getGreen() + cx.getGreen())/2);
         int blue = (int)((cy.getBlue() + cy.getBlue())/2);
