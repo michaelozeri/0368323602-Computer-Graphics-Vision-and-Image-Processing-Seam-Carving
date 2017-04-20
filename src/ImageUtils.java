@@ -220,55 +220,55 @@ public class ImageUtils {
 		return seam;
 	}
 	
+	
+	
 	/**
-	 * removes a straight seam from the image for the 'straight_seam' implementation
+	 * removes straight seams from the image for the 'straight_seam' implementation
 	 * need's to calculate energy only once
-	 * */
-	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype, int colsToRemove){
-		
-		int m = originalimage.getWidth();
-				
-		//calculate the energy matrix
-		double[][] energymat = calculate_Energy(originalimage, energytype);
-
-		//calculate a vector that each index holds the column seam value
-		double[] seamVector = calcuate_Straight_Seam(energymat);
-		
-		int minindex;
-		
-		for (int i = 0; i < colsToRemove; i++) {
+	 * @param originalimage - the image from which to remove the seams
+	 * @param energytype - the energy type calculation of the energy matrix
+	 * @param colsToRemove - how many seams to remove
+	 * @return the new picture without the seams
+	 */
+	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype, int ColToRemove){
+			
+			int m = originalimage.getWidth();
+			int n = originalimage.getHeight();
+			
+			//calculate the energy matrix
+			double[][] energymat = calculate_Energy(originalimage, energytype);
+	
+			//calculate a vector that each index holds the column seam value
+			double[] seamVector = calcuate_Straight_Seam(energymat);
 			
 			//choose the minimum seam to remove from the seam vector
-			minindex = 0;			
-			double min = seamVector[0];
-			for(int j =1; j<m;j++){
-				double temp = seamVector[j];
-				if(temp<min){
-					minindex = j;
-					min = seamVector[j];
+			double maxdub = Double.MAX_VALUE;
+			for(int i = 0; i<ColToRemove; i++){
+				int minindex = 0;
+				double min = seamVector[0];
+				for(int j =1; j<m;j++){
+					double temp = seamVector[j];
+					if(temp<min){
+						minindex = j;
+						min = seamVector[j];
+					}
 				}
+				seamVector[minindex] = maxdub;
 			}
+			BufferedImage newImage = new BufferedImage(originalimage.getWidth()-ColToRemove, originalimage.getHeight(), originalimage.getType());
 			
-			//set that seam as not minimal
-			seamVector[minindex] = Double.MAX_VALUE;
-			
-			//create a new image with one less column
-			BufferedImage tempImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
-			
-			for(int k=0; k<originalimage.getHeight(); k++){
+			for(int i=0; i<n; i++){
 				int c = 0;
-	            for(int l=0; l<originalimage.getWidth(); l++){
-	            	if(l == minindex){
+	            for(int j=0; j<m; j++){
+	            	if(seamVector[j] == maxdub){
 	            		continue;
 	            	}
-	                tempImage.setRGB(c,k,originalimage.getRGB(l,k));
+	                newImage.setRGB(c,i,originalimage.getRGB(j,i));
 	                c++;
 	            }
 	         }
-			originalimage = tempImage;
+			return newImage;
 		}
-		return originalimage;
-	}
 	
 	/**
 	 * this function calculates the straight seam to be removed by summing
@@ -353,25 +353,23 @@ public class ImageUtils {
 		int m = energy[0].length;
 		int n = energy.length;
 		int[][] minSeam = new int[n][m];
-		double mindubVal = Double.MIN_VALUE;
+		double maxdubVal = attribute[n-1][0];
 		for(int i = 0; i<colToadd;i++){
 			double min = attribute[n-1][0];
 			int minindex = 0;
-			while(minindex<m && attribute[n-1][minindex] == mindubVal){
-				minindex++;
-			}
-			if(minindex==m)
-				minindex--;
 			min = attribute[n-1][minindex];
 			for(int j =minindex+1; j<m;j++){
 				double temp = attribute[n-1][j];
-				if(temp > mindubVal && temp<min){
+				if(temp<min){
 					minindex = j;
 					min = temp;
 				}
+				if(temp>maxdubVal){
+					maxdubVal = temp;
+				}
 			}
-			attribute[n-1][minindex] =mindubVal;
-
+			attribute[n-1][minindex] =maxdubVal;
+			energy[n-1][minindex] +=maxdubVal;
 			minSeam[n-1][minindex]++;
 			for(int r = n-1; r>0;r--){
 				if(minindex == 0){
@@ -391,7 +389,9 @@ public class ImageUtils {
 							minindex = minindex-1;
 				}
 				minSeam[r-1][minindex]++;
+				energy[r-1][minindex] += maxdubVal;
 			}
+			attribute = calculate_Pixel_Attribute(energy);
 		}
         return minSeam;
 		
