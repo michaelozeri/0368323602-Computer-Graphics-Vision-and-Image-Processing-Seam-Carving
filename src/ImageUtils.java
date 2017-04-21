@@ -360,46 +360,77 @@ public class ImageUtils {
 		}
 		int m = energy[0].length;
 		int n = energy.length;
-		int[][] minSeam = new int[n][m];
-		double maxdubVal = attribute[n-1][0];
+		int[][] minSeam = new int[n][m];//counter matrix, will tell us how many times t duplicate each pixel
+		double maxdubVal;
+		int loops = 0; //with loops we will be able to know how many times we multiplied the picture
 		for(int i = 0; i<colToadd;i++){
 			double min = attribute[n-1][0];
 			int minindex = 0;
-			min = attribute[n-1][minindex];
+			while(minSeam[n-1][minindex]!=loops && minindex<m){//find the first index we havent chosen
+				minindex++;
+			}
+			if(minindex ==m){//find the first pixel we havent chosen
+				loops++;
+				minindex = 0;
+			}
+			maxdubVal = attribute[n-1][0];//max val 
+			min = attribute[n-1][minindex];//minimum value will start from the first index we haven chosen
 			for(int j =minindex+1; j<m;j++){
 				double temp = attribute[n-1][j];
-				if(temp<min){
+				if(temp<min && minSeam[n-1][j]==loops){//get min val(one we havent chosen yet
 					minindex = j;
 					min = temp;
 				}
-				if(temp>maxdubVal){
+				else if(temp>maxdubVal){//get max val
 					maxdubVal = temp;
 				}
 			}
 			attribute[n-1][minindex] =maxdubVal;
-			//energy[n-1][minindex] +=10000; //TODO: kralnara vs moreach
-			minSeam[n-1][minindex]++;
-			for(int r = n-1; r>0;r--){
+			energy[n-1][minindex] +=(maxdubVal+1000); //add energy to the min pixel
+			minSeam[n-1][minindex]++; //sign that we chosed the pixel
+			for(int r = n-1; r>0;r--){//find the minimal path
 				if(minindex == 0){
-					if(attribute[r-1][minindex]> attribute[r-1][minindex+1])
+					int minloop = Math.min(minSeam[r-1][minindex],minSeam[r-1][minindex+1]);
+					if(attribute[r-1][minindex]> attribute[r-1][minindex+1] && minSeam[r-1][minindex+1]==minloop)
 						minindex = minindex+1;
 				}
 				else if(minindex == m-1){
-					if(attribute[r-1][minindex]> attribute[r-1][minindex-1])
+					int minloop = Math.min(minSeam[r-1][minindex],minSeam[r-1][minindex-1]);
+					if(attribute[r-1][minindex]> attribute[r-1][minindex-1] && minSeam[r-1][minindex-1]==minloop)
 						minindex = minindex-1;
 				}
 				else{
-					min = Math.min(attribute[r-1][minindex-1], attribute[r-1][minindex]);
-					min = Math.min(attribute[r-1][minindex+1], min);
-					if(min == attribute[r-1][minindex+1])
+					int minloop = Math.min(minSeam[r-1][minindex-1],minSeam[r-1][minindex+1]);
+				    minloop = Math.min(minSeam[r-1][minindex],minloop);
+					if( minSeam[r-1][minindex-1]==minloop&& minSeam[r-1][minindex]==minloop&& minSeam[r-1][minindex+1]==minloop){//we would prefer not to pass go through the same seam more than one so we check if there's a way without a pixel we've doubled
+						min = Math.min(attribute[r-1][minindex-1], attribute[r-1][minindex]);
+						min = Math.min(attribute[r-1][minindex+1], min);
+					}
+					else if( minSeam[r-1][minindex-1]==minloop&& minSeam[r-1][minindex]==minloop){//only the one above and to the left havent been chosen already
+						min = Math.min(attribute[r-1][minindex-1], attribute[r-1][minindex]);
+					}
+					else if( minSeam[r-1][minindex+1]==minloop&& minSeam[r-1][minindex]==minloop){//only the one above and to the right havent been chosen already
+						min = Math.min(attribute[r-1][minindex+1], attribute[r-1][minindex]);
+					}
+					else if( minSeam[r-1][minindex+1]==minloop&& minSeam[r-1][minindex-1]==minloop){//only the one to the left and to the one right havent been chosen already
+						min = Math.min(attribute[r-1][minindex+1], attribute[r-1][minindex-1]);
+					}
+					else if(minSeam[r-1][minindex-1]==minloop){//only the one to the left havent been chosen already
+						min = attribute[r-1][minindex-1];
+					}
+					else if(minSeam[r-1][minindex+1]==minloop){//only the one to the right havent been chosen already
+						min = attribute[r-1][minindex+1];
+					}
+					if(min == attribute[r-1][minindex+1]){//we check which one compares to min
 						minindex = minindex+1;
-					else if(min == attribute[r-1][minindex-1])
+					}
+					else if(min == attribute[r-1][minindex-1])//we check which one compares to min
 							minindex = minindex-1;
 				}
-				minSeam[r-1][minindex]++;
-				energy[r-1][minindex] += maxdubVal+1000;
+				minSeam[r-1][minindex]++;//sign that we chosed the pixel
+				energy[r-1][minindex] += (maxdubVal+1000);//add energy to the chosen pixel
 			}
-			if(energytype < 2){
+			if(energytype < 2){//calculate attribute again
 				attribute = calculate_Pixel_Attribute(energy);
 			}else{
 				attribute = calculate_Forward_Attribute(originalImage, energytype, energy);
@@ -421,7 +452,7 @@ public class ImageUtils {
 		for(int i=0; i<m; i++){
 	    	for(int j=0; j<n; j++){
 	    		Color c = new Color(rgbmat[i][j]);
-	            int red = (int)(c.getRed() * 0.299);
+	            int red = (int)(c.getRed() * 0.299);//the numbers were found on the web
 	            int green = (int)(c.getGreen() * 0.587);
 	            int blue = (int)(c.getBlue() * 0.114);
 	            greyscaleMat[i][j] = red+green+blue;
