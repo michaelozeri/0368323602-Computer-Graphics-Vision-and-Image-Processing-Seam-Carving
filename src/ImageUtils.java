@@ -233,7 +233,7 @@ public class ImageUtils {
 	 * @param colsToRemove - how many seams to remove
 	 * @return the new picture without the seams
 	 */
-	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype, int ColToRemove){
+	public static BufferedImage remove_Straight_Seam(BufferedImage originalimage, int energytype){
 			
 			int m = originalimage.getWidth();
 			int n = originalimage.getHeight();
@@ -246,7 +246,7 @@ public class ImageUtils {
 			
 			//choose the minimum seam to remove from the seam vector
 			double maxdub = Double.MAX_VALUE;
-			for(int i = 0; i<ColToRemove; i++){
+			/*for(int i = 0; i<ColToRemove; i++){//remove all seams with one energy calculation
 				int minindex = 0;
 				double min = seamVector[0];
 				for(int j =1; j<m;j++){
@@ -257,8 +257,18 @@ public class ImageUtils {
 					}
 				}
 				seamVector[minindex] = maxdub;
+			}*/
+			int minindex = 0;
+			double min = seamVector[0];
+			for(int j =1; j<m;j++){
+				double temp = seamVector[j];
+				if(temp<min){
+					minindex = j;
+					min = seamVector[j];
+				}
 			}
-			BufferedImage newImage = new BufferedImage(originalimage.getWidth()-ColToRemove, originalimage.getHeight(), originalimage.getType());
+			seamVector[minindex] = maxdub;
+			BufferedImage newImage = new BufferedImage(originalimage.getWidth()-1, originalimage.getHeight(), originalimage.getType());
 			
 			for(int i=0; i<n; i++){
 				int c = 0;

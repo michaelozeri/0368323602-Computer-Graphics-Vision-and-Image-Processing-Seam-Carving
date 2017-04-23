@@ -14,7 +14,7 @@ public class HomeAssignment1main {
 		
 		long starttime = System.nanoTime(); //TODO: remove this
 		
-		boolean straight_seam = false; //for submission types TODO: maybe remove this?
+		boolean straight_seam = true; //for submission types TODO: maybe remove this?
 		boolean add_interpolation = true;
 		
 		if(args.length != 5){
@@ -51,7 +51,8 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype,resizenumber);
+					for(;resizenumber>0;resizenumber--)
+						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
 				}
 				else{
 					for(;resizenumber>0;resizenumber--){
@@ -76,7 +77,8 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype,resizenumber);
+					for(;resizenumber>0;resizenumber--)
+						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
 				}
 				else{
 					for(;resizenumber>0;resizenumber--){
