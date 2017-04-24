@@ -7,19 +7,30 @@ import java.io.IOException;
 
 
 
-
+/**
+ * seam carving algorithm - content aware resizing
+ * @param inputimagepath - Full path to the input image
+ * @param outputnumcolumns - Number of columns of the resized output image
+ * @param outputnumrows - Number of rows of the resized output image
+ * @param energytype - An argument with three possible values, where '0' = regular
+ * energy without entropy term, '1' = regular energy with entropy term and '2' = forward energy
+ * @param outputimagepath - Full path to the output image (where your program 
+ * will write the output image to)
+ * @version 1.00
+ * @author Dor Alt & Michael Ozeri
+ */
 public class HomeAssignment1main {
 	
 	public static void main(String[] args){
 		
-		long starttime = System.nanoTime(); //TODO: remove this
-		
-		boolean straight_seam = true; //for submission types TODO: maybe remove this?
+		//this is a boolean to decide if to remove a straight seam or general
+		boolean straight_seam = false; 
+		//this is a boolean to decide if to calculate interpolation when adding seam
 		boolean add_interpolation = true;
 		
 		if(args.length != 5){
 			System.out.println("ERROR: not enough arguments inserted");
-			System.exit(0); //TODO: check if o.k to exit like this	
+			System.exit(-1); 
 		}
 		
 		int originalnumofrows=0;
@@ -51,8 +62,10 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					for(;resizenumber>0;resizenumber--)
+					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
+					}
+						
 				}
 				else{
 					for(;resizenumber>0;resizenumber--){
@@ -69,6 +82,7 @@ public class HomeAssignment1main {
 				}
 			}
 			
+			
 			inputimagebuffer = ImageUtils.transpose_Image(inputimagebuffer);
 			
 			//check how much to resize vertically
@@ -77,8 +91,9 @@ public class HomeAssignment1main {
 			// if we need to reduce vertical seam's
 			if (resizenumber > 0){
 				if(straight_seam){
-					for(;resizenumber>0;resizenumber--)
+					for(;resizenumber>0;resizenumber--){
 						inputimagebuffer = ImageUtils.remove_Straight_Seam(inputimagebuffer, energytype);
+					}
 				}
 				else{
 					for(;resizenumber>0;resizenumber--){
@@ -101,9 +116,7 @@ public class HomeAssignment1main {
 			File outputimagefile = new File(outputimagepath);
 			ImageIO.write(inputimagebuffer, "jpg", outputimagefile); 
 			
-			long finishtime = System.nanoTime() - starttime; //TODO: remove this
-
-			System.out.println("Done in "+(finishtime/1000000000)/60 +" minutes!");
+			System.out.println("Done!");
 			
 		}catch (IOException e){
 			System.out.println("IOException: "+e.getMessage());

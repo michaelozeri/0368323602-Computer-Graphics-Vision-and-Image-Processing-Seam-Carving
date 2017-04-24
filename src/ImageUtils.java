@@ -1,7 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.awt.Color;
-import java.io.BufferedWriter; //TODO: remove these are for logger
-import java.io.FileWriter; //TODO: remove these are for logger
+import java.io.BufferedWriter; 
+import java.io.FileWriter; 
 
 
 public class ImageUtils {
@@ -187,8 +187,9 @@ public class ImageUtils {
 				minIndex = j;
 			}
 		}
-		atrib[rows-1][minIndex] = Integer.MAX_VALUE; //TODO: remove this
-		print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+		atrib[rows-1][minIndex] = Integer.MAX_VALUE; 
+		//this was a logger function that prints the matrix into a logfile
+		//print_Mat_To_Logfile(atrib,"log1"); 
 		seam[0] = minIndex;
 		double tmpleft = Integer.MAX_VALUE;
 		double tmpmid = Integer.MAX_VALUE;
@@ -204,17 +205,18 @@ public class ImageUtils {
 			min = Math.min(tmpleft, Math.min(tmpright, tmpmid));
 			if(min == tmpmid){
 				seam[i] = seam[i-1];
-				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; 
 			}
 			else if(min == tmpleft){
 				seam[i] = seam[i-1]-1;
-				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; 
 			}
 			else{
 				seam[i] = seam[i-1]+1;
-				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; 
 			}
-			print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+			//this was a logger function that prints the matrix into a logfile
+			//print_Mat_To_Logfile(atrib,"log1"); 
 			//reset tmp values
 			tmpleft = Integer.MAX_VALUE;
 			tmpmid = Integer.MAX_VALUE;
@@ -501,7 +503,7 @@ public class ImageUtils {
 						if(j != m-1){		
 							rgbval = calculate_avrage_color(rgbval, originalimage.getRGB(j+1,i));
 						}
-	            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
+	            		newImage.setRGB(c,i,rgbval); 
             		}
             	}
                 c++;
@@ -560,7 +562,7 @@ public class ImageUtils {
 					int rgbval = originalimage.getRGB(j,i);
 	            	for(int k = 0; k<seam[i][j]; k++){
 						c++;
-	            		newImage.setRGB(c,i,rgbval); //TODO: check this is working
+	            		newImage.setRGB(c,i,rgbval); 
 	        		}
 	        	}
 	            c++;
@@ -630,9 +632,11 @@ public class ImageUtils {
         return c.getRGB();
 	}
 	
-	/*
+	/**
 	 * this function calculates the minimal seam to remove and returns it as a vector
-	 * */
+	 * @param atrib - the energy matrix which to calculate the general seam from
+	 * @return - double[][] the matrix which the seam is written inside
+	 */
 	private static double[][] calculate_General_Seam_static(double[][] atrib){
 		
 		int rows = atrib.length; //m=rows
@@ -648,7 +652,8 @@ public class ImageUtils {
 			}
 		}
 		atrib[rows-1][minIndex] = Integer.MAX_VALUE; 
-		print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+		//this was a logger to print the matrix to a logfile
+		//print_Mat_To_Logfile(atrib,"log1"); 
 		seam[0] = minIndex;
 		double tmpleft = Integer.MAX_VALUE;
 		double tmpmid = Integer.MAX_VALUE;
@@ -664,17 +669,18 @@ public class ImageUtils {
 			min = Math.min(tmpleft, Math.min(tmpright, tmpmid));
 			if(min == tmpmid){
 				seam[i] = seam[i-1];
-				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]] = Integer.MAX_VALUE; 
 			}
 			else if(min == tmpleft){
 				seam[i] = seam[i-1]-1;
-				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]-1] = Integer.MAX_VALUE; 
 			}
 			else{
 				seam[i] = seam[i-1]+1;
-				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; //TODO: remove these three
+				atrib[rows-1-i][seam[i-1]+1] = Integer.MAX_VALUE; 
 			}
-			print_Mat_To_Logfile(atrib,"log1"); //TODO: remove
+			//this was a logger to print the matrix to a logfile
+			//print_Mat_To_Logfile(atrib,"log1"); 
 			//reset tmp values
 			tmpleft = Integer.MAX_VALUE;
 			tmpmid = Integer.MAX_VALUE;
@@ -683,6 +689,11 @@ public class ImageUtils {
 		return atrib;
 	}
 	
+	/**
+	 * this function removes a seam from the energy matrix
+	 * @param atrib
+	 * @return
+	 */
 	private static double[][] calculate_new_atribute(double[][] atrib){
 		
 		double[][] atribnew = new double[atrib.length][atrib[0].length-1];
@@ -705,6 +716,12 @@ public class ImageUtils {
 		return atribnew;
 	}
 	
+	/**
+	 * this function removes a seam decided in atrib from the image img
+	 * @param img
+	 * @param atrib
+	 * @return
+	 */
 	private static BufferedImage calculate_new_image(BufferedImage img,double[][] atrib){
 		
 		int rows = img.getHeight();
