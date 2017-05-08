@@ -1,11 +1,7 @@
 import java.io.File;
-
 import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-
 
 /**
  * seam carving algorithm - content aware resizing
