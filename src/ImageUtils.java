@@ -8,7 +8,7 @@ public class ImageUtils {
 	
 	
 	// a boolean deciding if to log or not
-	public static boolean m_log = false;
+	private static boolean m_log = false;
 	
 	/**
 	 * prints the matrix into a log file for debug purposes
