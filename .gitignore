@@ -8,3 +8,5 @@
 .gradle/buildOutputCleanup/cache.properties
 .gradle/buildOutputCleanup/outputFiles.bin
 gradle/wrapper/gradle-wrapper.jar
+*.xml
+.idea/workspace.xml
