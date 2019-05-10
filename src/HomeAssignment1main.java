@@ -1,22 +1,28 @@
+package src;
+
 import java.io.File;
+import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
  * seam carving algorithm - content aware resizing
+ * @param inputImagePath   - Full path to the input image
+ * @param outputNumColumns - Number of columns of the resized output image
+ * @param outputNumRows    - Number of rows of the resized output image
+ * @param energyType       - An argument with three possible values, where '0' = regular
+ * energy without entropy term, '1' = regular energy with entropy term and '2' = forward energy
+ * outputimagepath  - Full path to the output image (where your program
+ * will write the output image to)
  *
- * @param inputimagepath   - Full path to the input image
- * @param outputnumcolumns - Number of columns of the resized output image
- * @param outputnumrows    - Number of rows of the resized output image
- * @param energytype       - An argument with three possible values, where '0' = regular
- *                         energy without entropy term, '1' = regular energy with entropy term and '2' = forward energy
- * @param outputimagepath  - Full path to the output image (where your program
- *                         will write the output image to)
- * @author Dor Alt & Michael Ozeri
+ * @author Michael Ozeri
  * @version 1.00
  */
 public class HomeAssignment1main {
+
+    @Resource
+    private static ImageUtilsService imageUtilsService;
 
     public static void main(String[] args) {
 
@@ -60,25 +66,25 @@ public class HomeAssignment1main {
             if (resizeNumberVertically > 0) {
                 if (straightSeam) {
                     for (; resizeNumberVertically > 0; resizeNumberVertically--) {
-                        inputImageBuffer = ImageUtils.remove_Straight_Seam(inputImageBuffer, energyType);
+                        inputImageBuffer = imageUtilsService.remove_Straight_Seam(inputImageBuffer, energyType);
                     }
 
                 } else {
                     for (; resizeNumberVertically > 0; resizeNumberVertically--) {
-                        inputImageBuffer = ImageUtils.remove_General_seam(inputImageBuffer, energyType);
+                        inputImageBuffer = imageUtilsService.remove_General_seam(inputImageBuffer, energyType);
                     }
                 }
             }
             // need to add vertical seams's
             else if (resizeNumberVertically < 0) {
                 if (addInterpolation) {
-                    inputImageBuffer = ImageUtils.add_single_seam_with_interpolation(inputImageBuffer, energyType, -resizeNumberVertically);
+                    inputImageBuffer = imageUtilsService.add_single_seam_with_interpolation(inputImageBuffer, energyType, -resizeNumberVertically);
                 } else {
-                    inputImageBuffer = ImageUtils.add_single_seam(inputImageBuffer, energyType, -resizeNumberVertically);
+                    inputImageBuffer = imageUtilsService.add_single_seam(inputImageBuffer, energyType, -resizeNumberVertically);
                 }
             }
 
-            inputImageBuffer = ImageUtils.transpose_Image(inputImageBuffer);
+            inputImageBuffer = imageUtilsService.transpose_Image(inputImageBuffer);
 
             //check how much to resize vertically
             resizeNumberVertically = originalNumOfRows - outputNumRows;
@@ -87,25 +93,25 @@ public class HomeAssignment1main {
             if (resizeNumberVertically > 0) {
                 if (straightSeam) {
                     for (; resizeNumberVertically > 0; resizeNumberVertically--) {
-                        inputImageBuffer = ImageUtils.remove_Straight_Seam(inputImageBuffer, energyType);
+                        inputImageBuffer = imageUtilsService.remove_Straight_Seam(inputImageBuffer, energyType);
                     }
                 } else {
                     for (; resizeNumberVertically > 0; resizeNumberVertically--) {
-                        inputImageBuffer = ImageUtils.remove_General_seam(inputImageBuffer, energyType);
+                        inputImageBuffer = imageUtilsService.remove_General_seam(inputImageBuffer, energyType);
                     }
                 }
             }
             // need to add vertical seams's
             else if (resizeNumberVertically < 0) {
                 if (addInterpolation) {
-                    inputImageBuffer = ImageUtils.add_single_seam_with_interpolation(inputImageBuffer, energyType, -resizeNumberVertically);
+                    inputImageBuffer = imageUtilsService.add_single_seam_with_interpolation(inputImageBuffer, energyType, -resizeNumberVertically);
                 } else {
-                    inputImageBuffer = ImageUtils.add_single_seam(inputImageBuffer, energyType, -resizeNumberVertically);
+                    inputImageBuffer = imageUtilsService.add_single_seam(inputImageBuffer, energyType, -resizeNumberVertically);
                 }
             }
 
             //transpose image back
-            inputImageBuffer = ImageUtils.transpose_Image(inputImageBuffer);
+            inputImageBuffer = imageUtilsService.transpose_Image(inputImageBuffer);
 
             File outputimagefile = new File(outputImagePath);
             ImageIO.write(inputImageBuffer, "jpg", outputimagefile);
