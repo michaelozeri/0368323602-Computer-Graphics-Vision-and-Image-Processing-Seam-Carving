@@ -1,5 +1,4 @@
-package src;
-
+package com.seamCarving;
 
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ public class ImageUtilsService {
 
 
     // a boolean deciding if to log or not
-    private static boolean M_LOG = false;
+    private static final boolean M_LOG = false;
 
     /**
      * prints the matrix into a log file for debug purposes
@@ -52,14 +51,13 @@ public class ImageUtilsService {
      * @param energytype - means how to calculate the energy (with / without local entropy
      * @return energymatrix - the energy matrix of the image given
      */
-    public double[][] calculate_Energy(BufferedImage image, int energytype) {
+    public double[][] calculateEnergy(BufferedImage image, EnergyType energytype) {
 
         int m = image.getHeight();
         int n = image.getWidth();
         double energy_ij = 0, valcount = 0;
-        ;
-        int[][] rgbmat = rgbMatrix(image); //returns Matrix of RGB colors
-        double[][] energymatrix = new double[m][n];
+        int[][] rgbMatrix = rgbMatrix(image); //returns Matrix of RGB colors
+        double[][] energyMatrix = new double[m][n];
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -67,22 +65,22 @@ public class ImageUtilsService {
                     for (int l = Math.max(j - 1, 0); l < Math.min(j + 2, n); l++) {
                         if (i != k || l != j) {
                             valcount++;
-                            energy_ij += calculate_Distance(rgbmat[i][j], rgbmat[k][l]);
+                            energy_ij += calculateDistance(rgbMatrix[i][j], rgbMatrix[k][l]);
                         }
                     }
                 }
                 energy_ij /= valcount;
-                energymatrix[i][j] = energy_ij;
+                energyMatrix[i][j] = energy_ij;
                 energy_ij = 0;
                 valcount = 0;
             }
         }
 
-        if (energytype == 1) {
-            calculate_Hi(energymatrix, rgbmat);
+        if (EnergyType.REGULAR_WITH_ENTROPY.equals(energytype)) {
+            addLocalEntropy(energyMatrix, rgbMatrix);
         }
 
-        return energymatrix;
+        return energyMatrix;
     }
 
     /**
@@ -108,20 +106,20 @@ public class ImageUtilsService {
      *
      * @return newImage - the image with the seam removed
      */
-    public BufferedImage remove_General_seam(BufferedImage originalimage, int energytype) {
+    public BufferedImage removeGeneralSeam(BufferedImage originalimage, EnergyType energytype) {
 
         int rows = originalimage.getHeight();
         int cols = originalimage.getWidth();
 
-        double[][] energymat = calculate_Energy(originalimage, energytype);
+        double[][] energymat = calculateEnergy(originalimage, energytype);
         double[][] dynamicEnergyMat;
 
-        if (energytype < 2) {
+        if (!EnergyType.FORWARD_ENERGY.equals(energytype)) {
             //calculate pixel attribute
-            dynamicEnergyMat = calculate_Pixel_Attribute(energymat);
+            dynamicEnergyMat = calculatePixelAttribute(energymat);
             print_Mat_To_Logfile(dynamicEnergyMat, "atributefirst");
         } else {
-            dynamicEnergyMat = calculate_Forward_Attribute(originalimage, energytype, energymat);
+            dynamicEnergyMat = calculateForwardAttribute(originalimage, energytype, energymat);
         }
 
         //calculate minimal seam path - vector representing indexes
@@ -155,7 +153,7 @@ public class ImageUtilsService {
      *                     seam
      * @return atrib - the matrix energymatrix after the pixel attribute calculation
      */
-    private double[][] calculate_Pixel_Attribute(double[][] energymatrix) {
+    private double[][] calculatePixelAttribute(double[][] energymatrix) {
         int m = energymatrix.length; //m=rows
         int n = energymatrix[0].length;
         double tmpleft = Integer.MAX_VALUE;
@@ -247,17 +245,13 @@ public class ImageUtilsService {
      *                      colsToRemove - how many seams to remove
      * @return the new picture without the seams
      */
-    public BufferedImage remove_Straight_Seam(BufferedImage originalImage, int energyType) {
-
+    public BufferedImage removeStraightSeam(BufferedImage originalImage, EnergyType energyType) {
         int m = originalImage.getWidth();
         int n = originalImage.getHeight();
-
         //calculate the energy matrix
-        double[][] energyMat = calculate_Energy(originalImage, energyType);
-
+        double[][] energyMat = calculateEnergy(originalImage, energyType);
         //calculate a vector that each index holds the column seam value
-        double[] seamVector = calculate_Straight_Seam(energyMat);
-
+        double[] seamVector = calculateStraightSeam(energyMat);
         //choose the minimum seam to remove from the seam vector
         double maxDub = Double.MAX_VALUE;
 			/*for(int i = 0; i<ColToRemove; i++){//remove all seams with one energy calculation
@@ -303,7 +297,7 @@ public class ImageUtilsService {
      *
      * @return straightsSeam - a double array which each index represents the column energy
      */
-    public double[] calculate_Straight_Seam(double[][] energymatrix) {
+    public double[] calculateStraightSeam(double[][] energymatrix) {
         //value per each column
         double[] straightsSeam = new double[energymatrix[0].length];
         for (int i = 0; i < energymatrix.length; i++)//go through every row
@@ -317,7 +311,7 @@ public class ImageUtilsService {
      *
      * @return the energy matrix with local entropy
      */
-    private void calculate_Hi(double[][] matrix, int[][] rgbmat) {
+    private void addLocalEntropy(double[][] matrix, int[][] rgbmat) {
         int m = matrix.length;
         int n = matrix[0].length;
         double[][] pmnMat = calculate_pmn(rgbmat);
@@ -369,7 +363,7 @@ public class ImageUtilsService {
      *
      * @return int - the distance between the two points
      */
-    private int calculate_Distance(int orig, int second) {
+    private int calculateDistance(int orig, int second) {
         Color one = new Color(orig);
         Color two = new Color(second);
         return (Math.abs(one.getRed() - two.getRed()) + Math.abs(one.getBlue() - two.getBlue()) + Math.abs(one.getGreen() - two.getGreen())) / 3;
@@ -380,12 +374,12 @@ public class ImageUtilsService {
      *
      * @param energy - the energy matrix to calculate from it the minimal seam
      */
-    public int[][] calculate_Min_Seam(double[][] energy, int colToadd, int energytype, BufferedImage originalImage) {
+    public int[][] calculateMinSeam(double[][] energy, int colToadd, EnergyType energytype, BufferedImage originalImage) {
         double[][] attribute;
-        if (energytype < 2) {
-            attribute = calculate_Pixel_Attribute(energy);
+        if (!EnergyType.FORWARD_ENERGY.equals(energytype)) {
+            attribute = calculatePixelAttribute(energy);
         } else {
-            attribute = calculate_Forward_Attribute(originalImage, energytype, energy);
+            attribute = calculateForwardAttribute(originalImage, energytype, energy);
         }
         int m = energy[0].length;
         int n = energy.length;
@@ -450,10 +444,10 @@ public class ImageUtilsService {
                 minSeam[r - 1][minindex]++;//sign that we chosed the pixel
                 energy[r - 1][minindex] += (maxdubVal + 1000);//add energy to the chosen pixel
             }
-            if (energytype < 2) {//calculate attribute again
-                attribute = calculate_Pixel_Attribute(energy);
+            if (!EnergyType.FORWARD_ENERGY.equals(energytype)) {//calculate attribute again
+                attribute = calculatePixelAttribute(energy);
             } else {
-                attribute = calculate_Forward_Attribute(originalImage, energytype, energy);
+                attribute = calculateForwardAttribute(originalImage, energytype, energy);
             }
         }
         return minSeam;
@@ -490,17 +484,13 @@ public class ImageUtilsService {
      * @param colToadd      - number of cols to add
      * @return newImage - the new image with the added seam
      */
-    public BufferedImage add_single_seam_with_interpolation(BufferedImage originalimage, int energytype, int colToadd) {
+    public BufferedImage addSingleSeamWithInterpolation(BufferedImage originalimage, EnergyType energytype, int colToadd) {
         int m = originalimage.getWidth();
         int n = originalimage.getHeight();
-
-        double[][] energymat = calculate_Energy(originalimage, energytype);
-
+        double[][] energyMatrix = calculateEnergy(originalimage, energytype);
         //calculate min sim attribute
-        int[][] seam = calculate_Min_Seam(energymat, colToadd, energytype, originalimage);
-
+        int[][] seam = calculateMinSeam(energyMatrix, colToadd, energytype, originalimage);
         BufferedImage newImage = new BufferedImage(m + colToadd, n, originalimage.getType());
-
         for (int i = 0; i < n; i++) {
             int c = 0;
             for (int j = 0; j < m; j++) {
@@ -529,7 +519,7 @@ public class ImageUtilsService {
      * @param energytype - the energy type asked in the exercise
      * @return minSeam - the minimal seam to remove from the picture calculated by the forwarding method
      */
-    public double[][] calculate_Forward_Attribute(BufferedImage image, int energytype, double[][] energy) {
+    public double[][] calculateForwardAttribute(BufferedImage image, EnergyType energytype, double[][] energy) {
         //double[][] energy = calculate_Energy(image, energytype);
         int[][] rgbmat = rgbMatrix(image);
         double[][] minSeam = new double[energy.length][energy[0].length];
@@ -539,9 +529,9 @@ public class ImageUtilsService {
                 double cr = 0;
                 double cu = 0;
                 if ((j != 0 && j != (energy[0].length - 1))) {//i will never be 0
-                    cl = calculate_Distance(rgbmat[i][j - 1], rgbmat[i][j + 1]) + calculate_Distance(rgbmat[i - 1][j], rgbmat[i][j - 1]);
-                    cr = calculate_Distance(rgbmat[i][j - 1], rgbmat[i][j + 1]) + calculate_Distance(rgbmat[i - 1][j], rgbmat[i][j + 1]);
-                    cu = calculate_Distance(rgbmat[i][j - 1], rgbmat[i][j + 1]);
+                    cl = calculateDistance(rgbmat[i][j - 1], rgbmat[i][j + 1]) + calculateDistance(rgbmat[i - 1][j], rgbmat[i][j - 1]);
+                    cr = calculateDistance(rgbmat[i][j - 1], rgbmat[i][j + 1]) + calculateDistance(rgbmat[i - 1][j], rgbmat[i][j + 1]);
+                    cu = calculateDistance(rgbmat[i][j - 1], rgbmat[i][j + 1]);
                 }
                 if (j == 0) {
                     minSeam[i][j] += Math.min(energy[i - 1][j] + cu, energy[i - 1][j + 1] + cr);
@@ -554,13 +544,13 @@ public class ImageUtilsService {
         return minSeam;
     }
 
-    public BufferedImage add_single_seam(BufferedImage originalimage, int energytype, int colToadd) {
+    public BufferedImage addSingleSeam(BufferedImage originalimage, EnergyType energytype, int colToadd) {
         int m = originalimage.getWidth();
         int n = originalimage.getHeight();
-        double[][] energymat = calculate_Energy(originalimage, energytype);
+        double[][] energymat = calculateEnergy(originalimage, energytype);
 
         //calculate min sim attribute
-        int[][] seam = calculate_Min_Seam(energymat, colToadd, energytype, originalimage);
+        int[][] seam = calculateMinSeam(energymat, colToadd, energytype, originalimage);
 
         BufferedImage newImage = new BufferedImage(m + colToadd, n, originalimage.getType());
         for (int i = 0; i < n; i++) {
@@ -586,7 +576,7 @@ public class ImageUtilsService {
      * @param img - the image to transpose
      * @return retimg - the image transposed
      */
-    public BufferedImage transpose_Image(BufferedImage img) {
+    public BufferedImage transposeImage(BufferedImage img) {
         int m = img.getHeight();
         int n = img.getWidth();
         BufferedImage retimg = new BufferedImage(m, n, img.getType());
@@ -601,25 +591,20 @@ public class ImageUtilsService {
     /*
      * removes a general seam as described in the Assignment
      * */
-    public BufferedImage remove_General_seam_Energy_Once(BufferedImage originalimage, int energytype, int resizeNum) {
+    public BufferedImage remove_General_seam_Energy_Once(BufferedImage originalimage, EnergyType energytype, int resizeNum) {
 
-
-        double[][] energymat = calculate_Energy(originalimage, energytype);
+        double[][] energyMatrix = calculateEnergy(originalimage, energytype);
 
         //calculate pixel attribute
-        double[][] atrib = calculate_Pixel_Attribute(energymat);
+        double[][] atrib = calculatePixelAttribute(energyMatrix);
         print_Mat_To_Logfile(atrib, "atributefirst");
 
         for (; resizeNum > 0; resizeNum--) {
-
             //calculate minimal seam path - vector representing indexes
             atrib = calculate_General_Seam_static(atrib);
-
             //create new image with one less column (width-1)
             originalimage = calculate_new_image(originalimage, atrib);
-
             atrib = calculate_new_atribute(atrib);
-
         }
 
         //return new image

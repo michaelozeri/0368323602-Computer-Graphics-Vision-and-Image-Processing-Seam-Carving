@@ -10,3 +10,11 @@
 gradle/wrapper/gradle-wrapper.jar
 *.xml
 .idea/workspace.xml
+/build/classes/java/main/com/seamCarving/SeamCarvingApplication.class
+*.class
+/.gradle
+/.idea
+/gradle
+0368323602-Computer-Graphics-Vision-and-Image-Processing-Seam-Carving.iml
+0368323602-Computer-Graphics-Vision-and-Image-Processing-Seam-Carving.ipr
+0368323602-Computer-Graphics-Vision-and-Image-Processing-Seam-Carving.iws
