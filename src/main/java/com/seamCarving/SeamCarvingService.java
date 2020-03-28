@@ -91,7 +91,7 @@ public class SeamCarvingService {
                 .map(Optional::get)
                 .collect(Collectors.toList());
         if (!seamCarvingValidationErrors.isEmpty()) {
-            throw new IllegalArgumentException("The following errors have occured: " + seamCarvingValidationErrors);
+            throw new IllegalArgumentException("The following errors have occurred: " + seamCarvingValidationErrors);
         }
     }
 
