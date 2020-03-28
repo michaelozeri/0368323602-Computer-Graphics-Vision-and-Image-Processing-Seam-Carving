@@ -23,16 +23,6 @@ public class seamCarvingController {
     @Resource
     private SeamCarvingService seamCarvingService;
 
-//    {
-//        "inputImagePath": "/home/michaelo/Downloads/testImage.jpg",
-//            "outputNumColumns": 1300,
-//            "outputNumRows": 1100,
-//            "energyType": "REGULAR_NO_ENTROPY",
-//            "outputImagePath": "/home/michaelo/Downloads/testImageResult.jpg",
-//            "straightSeam": true,
-//            "addInterpolation": true
-//    }
-
     @ResponseBody
     @RequestMapping(path = "/carveSeam", method = RequestMethod.POST)
     public ResponseEntity<SeamCarvingDto> getEventById(@RequestBody SeamCarvingDto seamCarvingDto) {
