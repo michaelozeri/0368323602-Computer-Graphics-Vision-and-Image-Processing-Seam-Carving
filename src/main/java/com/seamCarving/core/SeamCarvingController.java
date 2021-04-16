@@ -1,4 +1,4 @@
-package com.seamCarving;
+package com.seamCarving.core;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -13,20 +13,18 @@ import javax.imageio.ImageIO;
 import javax.websocket.server.PathParam;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 
 @Controller
 @RequestMapping("/api/SeamCarving")
 public class SeamCarvingController {
 
-    private Logger logger = LoggerFactory.getLogger(SeamCarvingController.class);
+    private final Logger logger = LoggerFactory.getLogger(SeamCarvingController.class);
 
     @Resource
     private SeamCarvingService seamCarvingService;
 
     @ResponseBody
-    @RequestMapping(path = "/carveSeam", method = RequestMethod.POST)
+    @RequestMapping(path = "/seam", method = RequestMethod.POST)
     public ResponseEntity<SeamCarvingResponse<SeamCarvingDto>> getEventById(@RequestBody SeamCarvingDto seamCarvingDto) {
         try {
             seamCarvingService.carveSeam(seamCarvingDto);
@@ -41,7 +39,7 @@ public class SeamCarvingController {
     }
 
     @ResponseBody
-    @RequestMapping(path = "/Dimensions", method = RequestMethod.GET)
+    @RequestMapping(path = "/image-dimensions", method = RequestMethod.GET)
     public ResponseEntity<SeamCarvingResponse<Pair<String, String>>> getImageDimensions(@PathParam("inputImagePath") String inputImagePath) {
         try {
             File inputImageFile = new File(inputImagePath);

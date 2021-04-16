@@ -1,4 +1,4 @@
-package com.seamCarving;
+package com.seamCarving.core;
 
 /*
 An argument with three possible values, where

@@ -1,4 +1,4 @@
-package com.seamCarving;
+package com.seamCarving.core;
 
 import org.springframework.stereotype.Service;
 

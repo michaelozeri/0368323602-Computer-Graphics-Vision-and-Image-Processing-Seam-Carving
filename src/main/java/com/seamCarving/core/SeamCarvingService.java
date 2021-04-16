@@ -1,4 +1,4 @@
-package com.seamCarving;
+package com.seamCarving.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 public class SeamCarvingService {
 
-    private Logger logger = LoggerFactory.getLogger(SeamCarvingService.class);
+    private final Logger logger = LoggerFactory.getLogger(SeamCarvingService.class);
 
     @Autowired
     private List<SeamCarvingValidator> validatorList;
