@@ -1,11 +1,11 @@
 package com.seamCarving;
 
+import com.seamCarving.core.SeamCarvingController;
+import com.seamCarving.core.SeamCarvingResponse;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
